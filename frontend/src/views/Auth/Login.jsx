@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import Navbar from '../../components/navbar';
+import Navbar from '../../components/navbar'
 import '../Auth/Auth.css'
 
 export default function Login() {
@@ -16,6 +16,9 @@ export default function Login() {
   return (
     <div className="auth-shell">
       <div className="auth-card">
+        <header className="auth-page-head">
+          <Navbar hideAuthButtons />
+        </header>
         <header className="auth-header">
           <div className="brand-mark">TF</div>
           <h1>Welcome back</h1>

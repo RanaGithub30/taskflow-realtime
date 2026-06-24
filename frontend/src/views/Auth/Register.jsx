@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
+import Navbar from '../../components/navbar'
 import '../Auth/Auth.css'
 
 export default function Register() {
@@ -16,6 +17,9 @@ export default function Register() {
   return (
     <div className="auth-shell">
       <div className="auth-card">
+        <header className="auth-page-head">
+          <Navbar hideAuthButtons />
+        </header>
         <header className="auth-header">
           <div className="brand-mark">TF</div>
           <h1>Create your account</h1>
