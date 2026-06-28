@@ -23,16 +23,18 @@ export default function Dashboard() {
       <Sidebar />
       
       <main className="dashboard-main">
-        {/* Header */}
         <header className="dashboard-header">
           <div>
+            <p className="dashboard-eyebrow">Overview</p>
             <h1 className="dashboard-title">Dashboard</h1>
-            <p className="dashboard-subtitle">Welcome back! Here's your tasks overview.</p>
+            <p className="dashboard-description">Welcome back! Here's your tasks overview and team performance summary.</p>
           </div>
-          <button className="dashboard-btn-primary">+ New Task</button>
+          <div className="dashboard-actions">
+            <button className="button-secondary">Review report</button>
+            <button className="button-primary">+ New Task</button>
+          </div>
         </header>
 
-        {/* Stats Grid */}
         <section className="dashboard-stats">
           {stats.map((stat, index) => (
             <div key={index} className="stat-card">
@@ -49,11 +51,13 @@ export default function Dashboard() {
           ))}
         </section>
 
-        {/* Recent Tasks */}
         <section className="dashboard-section">
           <div className="section-header">
-            <h2>Recent Tasks</h2>
-            <a href="/tasks" className="section-link">View all →</a>
+            <div>
+              <h2>Recent Tasks</h2>
+              <p className="section-description">Tasks currently being tracked across projects.</p>
+            </div>
+            <button className="button-secondary">View all</button>
           </div>
 
           <div className="tasks-table-wrapper">
@@ -94,41 +98,25 @@ export default function Dashboard() {
           </div>
         </section>
 
-        {/* Quick Stats */}
         <section className="dashboard-grid">
           <div className="dashboard-card">
-            <h3>Task Distribution</h3>
+            <div className="card-header">
+              <h3>Task Distribution</h3>
+              <button className="button-secondary">Details</button>
+            </div>
             <div className="chart-placeholder">
               <p>📊 Task distribution chart</p>
             </div>
           </div>
 
-          <div className="dashboard-card">
-            <h3>Team Activity</h3>
-            <div className="activity-list">
-              <div className="activity-item">
-                <div className="activity-avatar">JD</div>
-                <div className="activity-details">
-                  <p className="activity-name">John Doe</p>
-                  <p className="activity-time">Completed 3 tasks today</p>
-                </div>
-              </div>
-              <div className="activity-item">
-                <div className="activity-avatar">SM</div>
-                <div className="activity-details">
-                  <p className="activity-name">Sarah Miller</p>
-                  <p className="activity-time">Started new project</p>
-                </div>
-              </div>
-              <div className="activity-item">
-                <div className="activity-avatar">MJ</div>
-                <div className="activity-details">
-                  <p className="activity-name">Mike Johnson</p>
-                  <p className="activity-time">Updated documentation</p>
-                </div>
-              </div>
-            </div>
-          </div>
+          <aside className="dashboard-summary-panel panel-card">
+            <h3 className="panel-title">Team Insights</h3>
+            <ul className="insights-list">
+              <li>John completed 3 tasks today.</li>
+              <li>Sarah started a new project initiative.</li>
+              <li>Mike updated documentation.</li>
+            </ul>
+          </aside>
         </section>
       </main>
     </div>

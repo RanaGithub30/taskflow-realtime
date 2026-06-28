@@ -26,6 +26,18 @@ export default function Sidebar() {
       href: '/projects'
     },
     {
+      id: 'timer',
+      label: 'Project Timer',
+      icon: '⏱️',
+      href: '/timer'
+    },
+    {
+      id: 'bugs',
+      label: 'Projects Bug Tracker',
+      icon: '🐞',
+      href: '/bugs'
+    },
+    {
       id: 'team',
       label: 'Team',
       icon: '👥',
