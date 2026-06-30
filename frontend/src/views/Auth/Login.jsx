@@ -1,11 +1,13 @@
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
 import Navbar from '../../components/navbar'
 import '../Auth/Auth.css'
 
 export default function Login() {
+  const location = useLocation()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [statusMessage, setStatusMessage] = useState(location.state?.message || { type: '', text: '' })
 
   function handleSubmit(e) {
     e.preventDefault()
@@ -26,6 +28,12 @@ export default function Login() {
         </header>
 
         <form className="auth-form" onSubmit={handleSubmit}>
+          {statusMessage?.text ? (
+            <div className={`auth-message ${statusMessage.type}`} aria-live="polite">
+              {statusMessage.text}
+            </div>
+          ) : null}
+
           <label className="form-label">
             Email
             <input
