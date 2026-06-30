@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import Navbar from '../../components/navbar'
 import '../Auth/Auth.css'
+import { createUser } from "../../services/userService";
 
 export default function Register() {
   const [name, setName] = useState('')
@@ -11,7 +12,7 @@ export default function Register() {
   function handleSubmit(e) {
     e.preventDefault()
     // TODO: Integrate with backend registration
-    console.log('register', { name, email, password })
+    createUser({ name, email, password })
   }
 
   return (
