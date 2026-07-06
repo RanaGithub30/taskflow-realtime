@@ -43,7 +43,7 @@ export default function Register() {
     <div className="auth-shell">
       <div className="auth-card">
         <header className="auth-page-head">
-          <Navbar hideAuthButtons />
+          <Navbar hideAuthButtons homeLabel="Home" />
         </header>
         <header className="auth-header">
           <div className="brand-mark">TF</div>

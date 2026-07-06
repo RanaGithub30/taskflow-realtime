@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import './Sidebar.css'
 
-export default function Sidebar() {
+function Sidebar({ isAuthenticated, ...props }) {
   const [isOpen, setIsOpen] = useState(true)
   const [activeMenu, setActiveMenu] = useState('dashboard')
 
@@ -68,6 +68,17 @@ export default function Sidebar() {
 
   return (
     <>
+    {!isAuthenticated ? (
+        <>
+        <span className="brand__mark">{props.brandMark}</span>
+        <div>
+            <p className="brand__name">{props.brandName}</p>
+            <p className="brand__tag">{props.brandTag}</p>
+          </div>
+        </>
+      ):(
+
+        <>
       <button 
         className="sidebar-toggle"
         onClick={() => setIsOpen(!isOpen)}
@@ -143,6 +154,17 @@ export default function Sidebar() {
           </div>
         </div>
       </aside>
+       </>
+      )}
     </>
   )
 }
+
+Sidebar.defaultProps = {
+  isAuthenticated: false,
+  brandMark: 'TF',
+  brandName: 'TaskFlow',
+  brandTag: 'Task Management',
+}
+
+export default Sidebar;

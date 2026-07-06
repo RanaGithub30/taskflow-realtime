@@ -1,16 +1,13 @@
 import './Home.css'
 import Navbar from '../components/navbar'
+import Sidebar from '../components/Sidebar'
 
 function Home() {
   return (
     <div className="home-shell">
       <header className="home-header">
         <div className="brand">
-          <span className="brand__mark">TF</span>
-          <div>
-            <p className="brand__name">TaskFlow</p>
-            <p className="brand__tag">Task Management</p>
-          </div>
+          <Sidebar />
         </div>
 
         <nav className="home-nav" aria-label="Main navigation">
