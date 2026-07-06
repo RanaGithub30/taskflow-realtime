@@ -20,7 +20,7 @@ export default function Dashboard() {
 
   return (
     <div className="dashboard-layout">
-      <Sidebar />
+      <Sidebar isAuthenticated={true} />
       
       <main className="dashboard-main">
         <header className="dashboard-header">

@@ -24,7 +24,7 @@ export default function Team() {
 
   return (
     <div className="team-layout">
-      <Sidebar />
+      <Sidebar isAuthenticated={true} />
 
       <main className="team-main">
         <header className="team-header">

@@ -40,7 +40,7 @@ export default function Timer() {
 
   return (
     <div className="timer-layout">
-      <Sidebar />
+      <Sidebar isAuthenticated={true} />
       <main className="timer-main">
         <header className="timer-header">
           <div>

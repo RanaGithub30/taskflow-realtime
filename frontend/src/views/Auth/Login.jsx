@@ -1,18 +1,38 @@
 import { useState } from 'react'
-import { Link, useLocation } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import Navbar from '../../components/navbar'
+import { loginUser } from "../../services/userService";
 import '../Auth/Auth.css'
 
 export default function Login() {
   const location = useLocation()
+  const navigate = useNavigate()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [statusMessage, setStatusMessage] = useState(location.state?.message || { type: '', text: '' })
 
-  function handleSubmit(e) {
+  async function handleSubmit(e) {
     e.preventDefault()
     // TODO: Integrate with backend auth
-    console.log('login', { email, password })
+    try{
+      await loginUser({ email, password })
+      navigate('/dashboard', {
+        state: {
+          message: {
+            type: 'success',
+            text: 'You have successfully logged in.'
+          }
+        }
+      })
+    }catch (error) {
+      const backendMessage = error?.response?.data?.message
+        || error?.response?.data?.error
+        || error?.response?.data?.errors?.email?.[0]
+        || 'We could not log you in right now. Please try again.'
+
+      setStatusMessage({ type: 'error', text: backendMessage })
+    }
+
   }
 
   return (

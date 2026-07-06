@@ -26,7 +26,7 @@ export default function Bugs() {
 
   return (
     <div className="bugs-layout">
-      <Sidebar />
+      <Sidebar isAuthenticated={true} />
       <main className="bugs-main">
         <header className="bugs-header">
           <div>

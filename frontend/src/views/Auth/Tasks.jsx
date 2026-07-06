@@ -129,7 +129,7 @@ export default function Tasks() {
 
   return (
     <div className="tasks-layout">
-      <Sidebar />
+      <Sidebar isAuthenticated={true} />
       
       <main className="tasks-main">
         {/* Header */}

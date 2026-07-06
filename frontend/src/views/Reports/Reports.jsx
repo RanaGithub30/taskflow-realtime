@@ -22,7 +22,7 @@ export default function Reports() {
 
   return (
     <div className="reports-layout">
-      <Sidebar />
+      <Sidebar isAuthenticated={true} />
 
       <main className="reports-main">
         <header className="reports-header">

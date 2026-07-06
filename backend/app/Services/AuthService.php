@@ -18,4 +18,15 @@ class AuthService{
         $user = $this->createUser($request);
         return $this->commonResponse($user, StatusEnum::USER_CREATED, 201);
     }
+
+    public function login($request){
+        $user = $this->getUser($request->email);
+
+        if($user && !\Hash::check($request->password, $user->password)){
+            return $this->commonResponse(null, StatusEnum::INVALID_CREDENTIALS, 401);
+        }
+
+        $token = $user->createToken('auth_token')->plainTextToken;
+        return $this->commonResponse(['access_token' => $token, 'token_type' => 'Bearer'], StatusEnum::LOGIN_SUCCESS, 200);
+    }
 }

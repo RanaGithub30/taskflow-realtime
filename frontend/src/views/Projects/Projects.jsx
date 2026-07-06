@@ -57,7 +57,7 @@ export default function Projects() {
 
   return (
     <div className="projects-layout">
-      <Sidebar />
+      <Sidebar isAuthenticated={true} />
 
       <main className="projects-main">
         <header className="projects-header">

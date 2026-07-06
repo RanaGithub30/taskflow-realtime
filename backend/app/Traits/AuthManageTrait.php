@@ -19,4 +19,9 @@ trait AuthManageTrait{
 
         return $user;
     }
+
+    public function getUser($email){
+        $user = User::where('email', $email)->first();
+        return $user;
+    }
 }
