@@ -161,6 +161,15 @@
   white-space: nowrap;
 }
 
+.sidebar-menu-button {
+  width: 100%;
+  border: none;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+  font: inherit;
+}
+
 .sidebar-menu-item:hover {
   background: rgba(99, 102, 241, 0.06);
   color: #4338ca;

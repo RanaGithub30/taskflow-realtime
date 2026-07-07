@@ -7,7 +7,6 @@ use App\Http\Controllers\api\UserAuthManageController;
 Route::prefix('v1')->group(function () {
     Route::post('/register', [UserAuthManageController::class, 'register']);
     Route::post('/login', [UserAuthManageController::class, 'login']);
-    Route::post('/logout', [UserAuthManageController::class, 'logout']);
     Route::get('/user', [UserAuthManageController::class, 'getUser']);
 });
 

@@ -1,10 +1,23 @@
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
+import { setAuthToken } from '../services/api'
 import './Sidebar.css'
 
 function Sidebar({ isAuthenticated, ...props }) {
   const [isOpen, setIsOpen] = useState(true)
   const [activeMenu, setActiveMenu] = useState('dashboard')
+  const navigate = useNavigate()
+  const location = useLocation()
+
+  const handleLogout = async () => {
+    try {
+      setAuthToken(null)
+      setActiveMenu('dashboard')
+      navigate('/login', { replace: true })
+    } catch (error) {
+      console.error('Error occurred while logging out:', error)
+    }
+  }
 
   const menuItems = [
     {
@@ -64,7 +77,16 @@ function Sidebar({ isAuthenticated, ...props }) {
       icon: '❓',
       href: '/help'
     },
+    {
+      id: 'logout',
+      label: 'Logout',
+      icon: '🚪',
+      action: handleLogout
+    },
   ]
+
+  const visibleMenuItems = [...menuItems, ...bottomMenuItems]
+  const activeMenuId = visibleMenuItems.find((item) => item.href === location.pathname)?.id || activeMenu
 
   return (
     <>
@@ -108,7 +130,7 @@ function Sidebar({ isAuthenticated, ...props }) {
                 <li key={item.id}>
                   <Link
                     to={item.href}
-                    className={`sidebar-menu-item ${activeMenu === item.id ? 'active' : ''}`}
+                    className={`sidebar-menu-item ${activeMenuId === item.id ? 'active' : ''}`}
                     onClick={() => setActiveMenu(item.id)}
                     title={!isOpen ? item.label : ''}
                   >
@@ -128,17 +150,34 @@ function Sidebar({ isAuthenticated, ...props }) {
             <ul className="sidebar-menu">
               {bottomMenuItems.map(item => (
                 <li key={item.id}>
-                  <Link
-                    to={item.href}
-                    className={`sidebar-menu-item ${activeMenu === item.id ? 'active' : ''}`}
-                    onClick={() => setActiveMenu(item.id)}
-                    title={!isOpen ? item.label : ''}
-                  >
-                    <span className="sidebar-menu-icon">{item.icon}</span>
-                    <span className={`sidebar-menu-label ${!isOpen ? 'hidden' : ''}`}>
-                      {item.label}
-                    </span>
-                  </Link>
+                  {item.action ? (
+                    <button
+                      type="button"
+                      className={`sidebar-menu-item sidebar-menu-button ${activeMenuId === item.id ? 'active' : ''}`}
+                      onClick={() => {
+                        setActiveMenu(item.id)
+                        item.action()
+                      }}
+                      title={!isOpen ? item.label : ''}
+                    >
+                      <span className="sidebar-menu-icon">{item.icon}</span>
+                      <span className={`sidebar-menu-label ${!isOpen ? 'hidden' : ''}`}>
+                        {item.label}
+                      </span>
+                    </button>
+                  ) : (
+                    <Link
+                      to={item.href}
+                      className={`sidebar-menu-item ${activeMenuId === item.id ? 'active' : ''}`}
+                      onClick={() => setActiveMenu(item.id)}
+                      title={!isOpen ? item.label : ''}
+                    >
+                      <span className="sidebar-menu-icon">{item.icon}</span>
+                      <span className={`sidebar-menu-label ${!isOpen ? 'hidden' : ''}`}>
+                        {item.label}
+                      </span>
+                    </Link>
+                  )}
                 </li>
               ))}
             </ul>

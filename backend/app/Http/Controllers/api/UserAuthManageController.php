@@ -26,11 +26,6 @@ class UserAuthManageController extends Controller
         return $this->authService->login($request);
     }
 
-    // public function logout(Request $request)
-    // {
-    //     return $this->authService->logout($request);
-    // }
-
     // public function getUser(Request $request)
     // {
     //     return $this->authService->getUser($request);
