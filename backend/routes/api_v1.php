@@ -7,9 +7,16 @@ use App\Http\Controllers\api\UserAuthManageController;
 Route::prefix('v1')->group(function () {
     Route::post('/register', [UserAuthManageController::class, 'register']);
     Route::post('/login', [UserAuthManageController::class, 'login']);
-    Route::get('/user', [UserAuthManageController::class, 'getUser']);
+    // Route::get('/auth/user', [UserAuthManageController::class, 'getUserDetails']);
 });
 
-// Route::get('/user', function (Request $request) {
-//     return $request->user();
-// })->middleware('auth:sanctum');
+Route::middleware('auth:sanctum')->group(function () {
+    Route::prefix('v1')->group(function () {
+        Route::prefix('auth')
+        ->middleware('auth:sanctum')
+        ->controller(UserAuthManageController::class)
+        ->group(function () {
+            Route::get('/user', 'getUserDetails');
+        });
+    });
+});

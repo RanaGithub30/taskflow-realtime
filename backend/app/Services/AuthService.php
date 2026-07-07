@@ -29,4 +29,9 @@ class AuthService{
         $token = $user->createToken('auth_token')->plainTextToken;
         return $this->commonResponse(['access_token' => $token, 'token_type' => 'Bearer'], StatusEnum::LOGIN_SUCCESS, 200);
     }
+
+    public function getUserDetails(){
+        $user = auth()->user();
+        return $this->commonResponse($user, StatusEnum::USER_FETCHED, 200);
+    }
 }

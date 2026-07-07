@@ -8,4 +8,5 @@ class StatusEnum
     const USER_CREATED = 'user_created';
     const INVALID_CREDENTIALS = 'Invalid Credentials';
     const LOGIN_SUCCESS = 'Login Success';
+    const USER_FETCHED = 'User Fetched';
 }

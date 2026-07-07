@@ -1,17 +1,39 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { setAuthToken } from '../services/api'
+import { getUserDetails as fetchUserDetails } from '../services/userService'
 import './Sidebar.css'
 
 function Sidebar({ isAuthenticated, ...props }) {
   const [isOpen, setIsOpen] = useState(true)
   const [activeMenu, setActiveMenu] = useState('dashboard')
+  const [user, setUser] = useState(null)
   const navigate = useNavigate()
   const location = useLocation()
+
+  useEffect(() => {
+    const loadUserDetails = async () => {
+      if (!isAuthenticated) {
+        setUser(null)
+        return
+      }
+
+      try {
+        const data = await fetchUserDetails()
+        setUser(data?.user || data)
+      } catch (error) {
+        console.error('Error fetching user details:', error)
+        setUser(null)
+      }
+    }
+
+    loadUserDetails()
+  }, [isAuthenticated])
 
   const handleLogout = async () => {
     try {
       setAuthToken(null)
+      setUser(null)
       setActiveMenu('dashboard')
       navigate('/login', { replace: true })
     } catch (error) {
@@ -87,6 +109,8 @@ function Sidebar({ isAuthenticated, ...props }) {
 
   const visibleMenuItems = [...menuItems, ...bottomMenuItems]
   const activeMenuId = visibleMenuItems.find((item) => item.href === location.pathname)?.id || activeMenu
+  const displayName = user?.name || user?.email || 'User'
+  const displayRole = user?.role || 'Admin'
 
   return (
     <>
@@ -186,10 +210,10 @@ function Sidebar({ isAuthenticated, ...props }) {
 
         {/* User Section */}
         <div className={`sidebar-user ${!isOpen ? 'sidebar-user--collapsed' : ''}`}>
-          <div className="sidebar-user-avatar">RA</div>
+          <div className="sidebar-user-avatar">{displayName.charAt(0).toUpperCase()}</div>
           <div className={`sidebar-user-info ${!isOpen ? 'hidden' : ''}`}>
-            <p className="sidebar-user-name">Rana Saha</p>
-            <p className="sidebar-user-role">Admin</p>
+            <p className="sidebar-user-name">{displayName}</p>
+            <p className="sidebar-user-role">{displayRole}</p>
           </div>
         </div>
       </aside>
