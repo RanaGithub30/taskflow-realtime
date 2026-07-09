@@ -49,16 +49,22 @@ function Sidebar({ isAuthenticated, ...props }) {
       href: '/dashboard'
     },
     {
-      id: 'tasks',
-      label: 'Tasks',
-      icon: '✓',
-      href: '/tasks'
+      id: 'team',
+      label: 'Team',
+      icon: '👥',
+      href: '/team'
     },
     {
       id: 'projects',
       label: 'Projects',
       icon: '📁',
       href: '/projects'
+    },
+    {
+      id: 'tasks',
+      label: 'Tasks',
+      icon: '✓',
+      href: '/tasks'
     },
     {
       id: 'timer',
@@ -71,12 +77,6 @@ function Sidebar({ isAuthenticated, ...props }) {
       label: 'Projects Bug Tracker',
       icon: '🐞',
       href: '/bugs'
-    },
-    {
-      id: 'team',
-      label: 'Team',
-      icon: '👥',
-      href: '/team'
     },
     {
       id: 'reports',
