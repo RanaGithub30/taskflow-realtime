@@ -1,10 +1,12 @@
 import { useState } from 'react'
 import Sidebar from '../../components/Sidebar'
 import './Projects.css'
+import NewProjectModal from './NewProjectModal'
 
 export default function Projects() {
   const [search, setSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState('all')
+  const [isModalOpen, setIsModalOpen] = useState(false)
 
   const projects = [
     {
@@ -59,20 +61,16 @@ export default function Projects() {
     <div className="projects-layout">
       <Sidebar isAuthenticated={true} />
 
+      {
+        isModalOpen && 
+        <NewProjectModal isOpen={isModalOpen} 
+        onClose={() => setIsModalOpen(false)}/>
+      }
+
       <main className="projects-main">
-        <header className="projects-header">
-          <div className="projects-header-copy">
-            <p className="projects-eyebrow">Projects</p>
-            <h1>Project workspace</h1>
-            <p className="projects-description">
-              Track progress, budgets, and milestones across active initiatives.
-            </p>
-          </div>
-          <div className="projects-header-actions">
-            <div className="header-pill">24 milestones this week</div>
-            <button className="button-primary">+ New project</button>
-          </div>
-        </header>
+        <ProjectHeader
+          onNewProject={() => setIsModalOpen(true)}
+        />
 
         <section className="projects-toolbar">
           <div className="projects-search-wrapper">
@@ -169,4 +167,29 @@ export default function Projects() {
       </main>
     </div>
   )
+}
+
+function ProjectHeader({ onNewProject }) {
+  return (
+    <header className="projects-header">
+      <div className="projects-header-copy">
+        <p className="projects-eyebrow">Projects</p>
+        <h1>Project workspace</h1>
+        <p className="projects-description">
+          Track progress, budgets, and milestones across active initiatives.
+        </p>
+      </div>
+
+      <div className="projects-header-actions">
+        <div className="header-pill">24 milestones this week</div>
+
+        <button
+          className="button-primary"
+          onClick={onNewProject}
+        >
+          + New project
+        </button>
+      </div>
+    </header>
+  );
 }
