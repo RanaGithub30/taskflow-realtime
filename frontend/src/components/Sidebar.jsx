@@ -49,16 +49,16 @@ function Sidebar({ isAuthenticated, ...props }) {
       href: '/dashboard'
     },
     {
-      id: 'team',
-      label: 'Team',
-      icon: '👥',
-      href: '/team'
-    },
-    {
       id: 'projects',
       label: 'Projects',
       icon: '📁',
       href: '/projects'
+    },
+    {
+      id: 'team',
+      label: 'Team',
+      icon: '👥',
+      href: '/team'
     },
     {
       id: 'tasks',

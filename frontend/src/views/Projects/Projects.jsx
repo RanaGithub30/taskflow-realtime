@@ -61,12 +61,17 @@ export default function Projects() {
 
       <main className="projects-main">
         <header className="projects-header">
-          <div>
+          <div className="projects-header-copy">
             <p className="projects-eyebrow">Projects</p>
             <h1>Project workspace</h1>
-            <p className="projects-description">Track progress, budgets, and milestones across active initiatives.</p>
+            <p className="projects-description">
+              Track progress, budgets, and milestones across active initiatives.
+            </p>
           </div>
-          <button className="button-primary">New project</button>
+          <div className="projects-header-actions">
+            <div className="header-pill">24 milestones this week</div>
+            <button className="button-primary">+ New project</button>
+          </div>
         </header>
 
         <section className="projects-toolbar">
@@ -81,30 +86,39 @@ export default function Projects() {
             <span className="search-icon">🔍</span>
           </div>
 
-          <select
-            className="projects-filter"
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-          >
-            <option value="all">All statuses</option>
-            <option value="Active">Active</option>
-            <option value="Planning">Planning</option>
-            <option value="Review">Review</option>
-          </select>
+          <div className="toolbar-actions">
+            <div className="toolbar-chip">Updated just now</div>
+            <select
+              className="projects-filter"
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+            >
+              <option value="all">All statuses</option>
+              <option value="Active">Active</option>
+              <option value="Planning">Planning</option>
+              <option value="Review">Review</option>
+            </select>
+          </div>
         </section>
 
         <section className="projects-summary">
-          <div className="summary-card">
+          <div className="summary-card summary-card--primary">
+            <span className="summary-icon">📁</span>
             <p className="summary-title">Projects</p>
             <p className="summary-value">{projects.length}</p>
+            <p className="summary-caption">Active portfolio</p>
           </div>
           <div className="summary-card">
+            <span className="summary-icon">⚡</span>
             <p className="summary-title">Active</p>
             <p className="summary-value">{projects.filter((p) => p.status === 'Active').length}</p>
+            <p className="summary-caption">Currently moving</p>
           </div>
           <div className="summary-card">
+            <span className="summary-icon">💰</span>
             <p className="summary-title">Budget</p>
             <p className="summary-value">$61.6k</p>
+            <p className="summary-caption">Across this quarter</p>
           </div>
         </section>
 
@@ -119,25 +133,32 @@ export default function Projects() {
                   <span>{project.progress}%</span>
                 </div>
               </div>
-              <h2 className="project-name">{project.name}</h2>
-              <p className="project-team">{project.team}</p>
-              <div className="project-progress-bar">
-                <div className="project-progress-fill" style={{ width: `${project.progress}%` }}></div>
-              </div>
-              <div className="project-meta">
-                <div>
-                  <span className="meta-label">Due</span>
-                  <p className="meta-value">{new Date(project.dueDate).toLocaleDateString()}</p>
+
+              <div className="project-card-body">
+                <h2 className="project-name">{project.name}</h2>
+                <p className="project-team">{project.team}</p>
+                <div className="project-progress-bar">
+                  <div className="project-progress-fill" style={{ width: `${project.progress}%` }}></div>
                 </div>
-                <div>
-                  <span className="meta-label">Budget</span>
-                  <p className="meta-value">{project.budget}</p>
+                <div className="project-meta">
+                  <div>
+                    <span className="meta-label">Due</span>
+                    <p className="meta-value">{new Date(project.dueDate).toLocaleDateString()}</p>
+                  </div>
+                  <div>
+                    <span className="meta-label">Budget</span>
+                    <p className="meta-value">{project.budget}</p>
+                  </div>
+                </div>
+                <div className="project-members">
+                  {project.members.map((member) => (
+                    <span key={member} className="member-pill">{member}</span>
+                  ))}
                 </div>
               </div>
-              <div className="project-members">
-                {project.members.map((member) => (
-                  <span key={member} className="member-pill">{member}</span>
-                ))}
+
+              <div className="project-card-footer">
+                <button className="button-tertiary">View details</button>
               </div>
             </article>
           ))}
