@@ -10,6 +10,28 @@ export default function NewProjectModal({ isOpen, onClose }) {
     dueDate: "",
   });
 
+  /** Validation Code Starts Here */
+  const [errors, setErrors] = useState({});
+
+  const validateField = (name, value) => {
+  switch (name) {
+    case "projectName":
+      if (!value.trim()) return "Project name is required";
+      if (value.trim().length < 3)
+        return "Minimum 3 characters required";
+      return "";
+
+    case "description":
+      if (!value.trim()) return "Description is required";
+      return "";
+
+    default:
+      return "";
+  }
+};
+
+  /** Validation Code Ends Here */
+
   if (!isOpen) return null;
 
   const handleChange = (e) => {
@@ -21,6 +43,19 @@ export default function NewProjectModal({ isOpen, onClose }) {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    const newErrors = {};
+
+    Object.keys(formData).forEach((key) => {
+      newErrors[key] = validateField(key, formData[key]);
+    });
+
+    setErrors(newErrors);
+
+    const hasErrors = Object.values(newErrors).some(
+      (error) => error !== ""
+    );
+
+    if (hasErrors) return;
 
     console.log(formData);
 
@@ -58,6 +93,9 @@ export default function NewProjectModal({ isOpen, onClose }) {
               placeholder="Enter project name"
               required
             />
+            {errors.projectName && (
+              <p style={styles.error}>{errors.projectName}</p>
+            )}
           </div>
 
           <div style={styles.formGroup}>
@@ -70,6 +108,9 @@ export default function NewProjectModal({ isOpen, onClose }) {
               onChange={handleChange}
               placeholder="Project description"
             />
+            {errors.description && (
+              <p style={styles.error}>{errors.description}</p>
+            )}
           </div>
 
           <div style={styles.row}>
@@ -248,5 +289,13 @@ const styles = {
     color: "#fff",
     fontWeight: "600",
     boxShadow: "0 10px 20px rgba(67, 56, 202, 0.18)",
+  },
+
+  error: {
+    color: "#ef4444",       // Red text
+    fontSize: "0.8rem",
+    fontWeight: "500",
+    margin: "0",
+    marginTop: "4px",
   },
 };
