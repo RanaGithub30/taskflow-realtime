@@ -99,67 +99,50 @@ export default function Projects() {
           </div>
         </section>
 
-        <section className="projects-summary">
-          <div className="summary-card summary-card--primary">
-            <span className="summary-icon">📁</span>
-            <p className="summary-title">Projects</p>
-            <p className="summary-value">{projects.length}</p>
-            <p className="summary-caption">Active portfolio</p>
-          </div>
-          <div className="summary-card">
-            <span className="summary-icon">⚡</span>
-            <p className="summary-title">Active</p>
-            <p className="summary-value">{projects.filter((p) => p.status === 'Active').length}</p>
-            <p className="summary-caption">Currently moving</p>
-          </div>
-          <div className="summary-card">
-            <span className="summary-icon">💰</span>
-            <p className="summary-title">Budget</p>
-            <p className="summary-value">$61.6k</p>
-            <p className="summary-caption">Across this quarter</p>
-          </div>
-        </section>
-
-        <section className="projects-grid">
-          {filteredProjects.map((project) => (
-            <article key={project.id} className="project-card">
-              <div className="project-card-top">
-                <p className={`project-status project-status--${project.status.toLowerCase()}`}>
-                  {project.status}
-                </p>
-                <div className="project-progress-box">
-                  <span>{project.progress}%</span>
-                </div>
-              </div>
-
-              <div className="project-card-body">
-                <h2 className="project-name">{project.name}</h2>
-                <p className="project-team">{project.team}</p>
-                <div className="project-progress-bar">
-                  <div className="project-progress-fill" style={{ width: `${project.progress}%` }}></div>
-                </div>
-                <div className="project-meta">
-                  <div>
-                    <span className="meta-label">Due</span>
-                    <p className="meta-value">{new Date(project.dueDate).toLocaleDateString()}</p>
-                  </div>
-                  <div>
-                    <span className="meta-label">Budget</span>
-                    <p className="meta-value">{project.budget}</p>
-                  </div>
-                </div>
-                <div className="project-members">
-                  {project.members.map((member) => (
-                    <span key={member} className="member-pill">{member}</span>
-                  ))}
-                </div>
-              </div>
-
-              <div className="project-card-footer">
-                <button className="button-tertiary">View details</button>
-              </div>
-            </article>
-          ))}
+        <section className="projects-table-wrapper">
+          <table className="projects-table">
+            <thead>
+              <tr>
+                <th className="serial-column">Sl. No</th>
+                <th>Project</th>
+                <th>Team</th>
+                <th>Status</th>
+                <th>Due date</th>
+                <th>Budget</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredProjects.map((project, index) => (
+                <tr key={project.id}>
+                  <td className="serial-column">{index + 1}</td>
+                  <td>
+                    <div className="project-table-name">{project.name}</div>
+                    <div className="project-table-subtitle">{project.members.join(', ')}</div>
+                  </td>
+                  <td>{project.team}</td>
+                  <td>
+                    <span className={`project-status project-status--${project.status.toLowerCase()}`}>
+                      {project.status}
+                    </span>
+                  </td>
+                  <td>{new Date(project.dueDate).toLocaleDateString()}</td>
+                  <td>{project.budget}</td>
+                  <td>
+                    <div className="table-actions">
+                      <button className="table-action-btn table-action-btn--edit">
+                        <span className="table-action-icon">✏️</span>
+                        Edit
+                      </button>
+                      <button className="table-action-btn table-action-btn--delete">
+                        <span className="table-action-icon">🗑️</span>
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
           {filteredProjects.length === 0 && (
             <div className="empty-message">No matching projects found.</div>
           )}
