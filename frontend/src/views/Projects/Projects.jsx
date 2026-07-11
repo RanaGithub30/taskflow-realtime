@@ -1,55 +1,38 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Sidebar from '../../components/Sidebar'
 import './Projects.css'
 import NewProjectModal from './NewProjectModal'
+import { getAllProjects } from "../../services/projectService";
 
 export default function Projects() {
   const [search, setSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState('all')
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const [projects, setProjects] = useState([])
 
-  const projects = [
-    {
-      id: 1,
-      name: 'TaskFlow redesign',
-      team: 'UI/UX',
-      progress: 78,
-      status: 'Active',
-      dueDate: '2024-08-05',
-      members: ['RA', 'JO', 'SM'],
-      budget: '$18.2k',
-    },
-    {
-      id: 2,
-      name: 'API platform build',
-      team: 'Backend',
-      progress: 52,
-      status: 'Active',
-      dueDate: '2024-08-20',
-      members: ['MK', 'AL', 'SR'],
-      budget: '$22.5k',
-    },
-    {
-      id: 3,
-      name: 'Mobile launch prep',
-      team: 'Mobile',
-      progress: 33,
-      status: 'Planning',
-      dueDate: '2024-09-10',
-      members: ['EM', 'LT'],
-      budget: '$12.8k',
-    },
-    {
-      id: 4,
-      name: 'Documentation hub',
-      team: 'Docs',
-      progress: 94,
-      status: 'Review',
-      dueDate: '2024-07-28',
-      members: ['SM', 'RA'],
-      budget: '$8.1k',
-    },
-  ]
+  /** Fetch all projects */
+   useEffect(() => {
+    getAllProjects()
+      .then((data) => {
+        
+        const formattedProjects = data.map(project => ({
+          id: project.id,
+          name: project.name,
+          team: project.team,
+          progress: project.progress ?? 0,
+          status: project.status ?? "Planning",
+          dueDate: project.due_date ?? "",
+          members: project.members ?? [],
+          budget: project.budget ?? "$0",
+        }));
+
+        setProjects(formattedProjects);
+      })
+      .catch((error) => {
+        console.error(error);
+      });
+  }, []);
+  /** Ends Here */
 
   const filteredProjects = projects.filter((project) => {
     const matchesSearch = project.name.toLowerCase().includes(search.toLowerCase())
