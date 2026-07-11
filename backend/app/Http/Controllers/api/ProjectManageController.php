@@ -13,6 +13,7 @@ class ProjectManageController extends Controller
 
     public function __construct(ProjectService $projectService)
     {
+        /** service container */
         $this->projectService = $projectService;
     }
 
@@ -24,7 +25,7 @@ class ProjectManageController extends Controller
 
     public function store(Request $request)
     {
-        $project = $this->projectService->store($request);
+        $project = $this->projectService->store($request->all());
         return response()->json($project);
     }
 

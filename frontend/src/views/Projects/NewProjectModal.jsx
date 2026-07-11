@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { createProject } from "../../services/projectService";
 
 export default function NewProjectModal({ isOpen, onClose }) {
   const [formData, setFormData] = useState({
@@ -9,6 +10,8 @@ export default function NewProjectModal({ isOpen, onClose }) {
     budget: "",
     dueDate: "",
   });
+
+  // const navigate = useNavigate()
 
   /** Validation Code Starts Here */
   const [errors, setErrors] = useState({});
@@ -59,7 +62,18 @@ export default function NewProjectModal({ isOpen, onClose }) {
 
     console.log(formData);
 
-    // TODO: Save project here
+    createProject(formData).then(() => {
+      // navigate('/projects', {
+      //   state: {
+      //     message: {
+      //       type: 'success',
+      //       text: 'Project created successfully.'
+      //     }
+      //   }
+      // })
+    }).catch((error) => {
+      console.error("Error creating project:", error);
+    });
 
     onClose();
   };

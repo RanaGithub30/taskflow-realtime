@@ -22,4 +22,19 @@ trait ProjectManageTrait{
 
         return $project;
     }
+
+    public function processData($data)
+    {
+        $user = auth()->user();
+        
+        $new_data['user_id'] = $user->id;
+        $new_data['name'] = $data['projectName'];
+        $new_data['description'] = $data['description'];
+        $new_data['team'] = $data['team'];
+        $new_data['status'] = $data['status'];
+        $new_data['budget'] = $data['budget'];
+        $new_data['dueDate'] = $data['dueDate'];
+
+        return $new_data;
+    }
 }

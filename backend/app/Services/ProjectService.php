@@ -20,9 +20,11 @@ class ProjectService
         return $project;
     }
 
-    public function store(Request $request)
+    public function store($data)
     {
-        $project = Project::create($request->all());
+        $user = auth()->user();
+        $new_data = $this->processData($data);
+        $project = Project::create($new_data);
         return $project;
     }
 
@@ -40,7 +42,7 @@ class ProjectService
         if (!$project) {
             return null;
         }
-        
+
         $project->delete();
     }
 }
