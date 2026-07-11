@@ -1,4 +1,4 @@
-import { apiPost, apiGet } from "./api";
+import { apiPost, apiGet, apiDelete } from "./api";
 
 const createProject = async (data) => {
     const token = localStorage.getItem("access_token");
@@ -22,4 +22,14 @@ const getAllProjects = async () => {
     return projects.data;
 }
 
-export { createProject, getAllProjects };
+const deleteProject = async (projectId) => {
+    const token = localStorage.getItem("access_token");
+    const response = await apiDelete(`/projects/${projectId}`, {
+        headers: {
+            Authorization: `Bearer ${token}`,
+        },
+    });
+    return response.data;
+}
+
+export { createProject, getAllProjects, deleteProject };

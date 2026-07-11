@@ -2,7 +2,8 @@ import { useState, useEffect } from 'react'
 import Sidebar from '../../components/Sidebar'
 import './Projects.css'
 import NewProjectModal from './NewProjectModal'
-import { getAllProjects } from "../../services/projectService";
+import { getAllProjects, deleteProject } from "../../services/projectService";
+import { showAlert } from '../../utils/alert';
 
 export default function Projects() {
   const [search, setSearch] = useState('')
@@ -32,6 +33,38 @@ export default function Projects() {
         console.error(error);
       });
   }, []);
+  /** Ends Here */
+
+  /** Delete Project */
+  const handleDeleteProject = async (projectId) => {
+  try {
+    const result = await showAlert.confirm(
+      'Are you sure you want to delete this project?',
+      'Delete Project'
+    );
+
+    if (!result.isConfirmed) {
+      return;
+    }
+
+    await deleteProject(projectId);
+
+    // Update the UI immediately
+    setProjects((prevProjects) =>
+      prevProjects.filter((project) => project.id !== projectId)
+    );
+
+    await showAlert.success(
+      'Project deleted successfully!',
+      'Success'
+    );
+  } catch (error) {
+    await showAlert.error(
+        'Failed to delete project.',
+        'Error'
+      );
+    }
+  };
   /** Ends Here */
 
   const filteredProjects = projects.filter((project) => {
@@ -117,7 +150,7 @@ export default function Projects() {
                         <span className="table-action-icon">✏️</span>
                         Edit
                       </button>
-                      <button className="table-action-btn table-action-btn--delete">
+                      <button className="table-action-btn table-action-btn--delete" onClick={() => handleDeleteProject(project.id)}>
                         <span className="table-action-icon">🗑️</span>
                       </button>
                     </div>
