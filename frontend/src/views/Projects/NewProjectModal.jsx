@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { createProject } from "../../services/projectService";
+import { showAlert } from '../../utils/alert';
 
 export default function NewProjectModal({ isOpen, onClose }) {
   const [formData, setFormData] = useState({
@@ -10,8 +11,6 @@ export default function NewProjectModal({ isOpen, onClose }) {
     budget: "",
     dueDate: "",
   });
-
-  // const navigate = useNavigate()
 
   /** Validation Code Starts Here */
   const [errors, setErrors] = useState({});
@@ -60,19 +59,10 @@ export default function NewProjectModal({ isOpen, onClose }) {
 
     if (hasErrors) return;
 
-    console.log(formData);
-
-    createProject(formData).then(() => {
-      // navigate('/projects', {
-      //   state: {
-      //     message: {
-      //       type: 'success',
-      //       text: 'Project created successfully.'
-      //     }
-      //   }
-      // })
-    }).catch((error) => {
-      console.error("Error creating project:", error);
+    createProject(formData).then(async () => {
+      await showAlert.success('Project created successfully.');
+    }).catch(async (error) => {
+      await showAlert.error('Failed to create project. Please try again.');
     });
 
     onClose();
