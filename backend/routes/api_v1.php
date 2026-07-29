@@ -30,6 +30,7 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::post('/', 'store');
             Route::get('/{project}', 'show');
             Route::put('/{project}', 'update');
+            Route::delete('/all', 'destroyAll');
             Route::delete('/{project}', 'destroy');
         });
     });

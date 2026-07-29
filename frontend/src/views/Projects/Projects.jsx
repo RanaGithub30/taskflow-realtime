@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import Sidebar from '../../components/Sidebar'
 import './Projects.css'
 import NewProjectModal from './NewProjectModal'
-import { getAllProjects, deleteProject } from "../../services/projectService";
+import { getAllProjects, deleteProject, deleteAllProjects } from "../../services/projectService";
 import { showAlert } from '../../utils/alert';
 
 export default function Projects() {
@@ -84,6 +84,25 @@ export default function Projects() {
   };
   /** Ends Here */
 
+  const handleDeleteAllProjects = async () => {
+    try {
+      const result = await showAlert.confirm(
+        'This will permanently remove all your projects. Continue?',
+        'Delete All Projects'
+      );
+
+      if (!result.isConfirmed) {
+        return;
+      }
+
+      await deleteAllProjects();
+      setProjects([]);
+      await showAlert.success('All projects were deleted successfully.', 'Success');
+    } catch (error) {
+      await showAlert.error('Failed to delete all projects.', 'Error');
+    }
+  };
+
   const filteredProjects = projects.filter((project) => {
     const matchesSearch = project.name.toLowerCase().includes(search.toLowerCase())
     const matchesStatus = statusFilter === 'all' || project.status === statusFilter
@@ -117,6 +136,8 @@ export default function Projects() {
       <main className="projects-main">
         <ProjectHeader
           onNewProject={handleOpenCreateModal}
+          onDeleteAllProjects={handleDeleteAllProjects}
+          hasProjects={projects.length > 0}
         />
 
         <section className="projects-toolbar">
@@ -202,7 +223,7 @@ export default function Projects() {
   )
 }
 
-function ProjectHeader({ onNewProject }) {
+function ProjectHeader({ onNewProject, onDeleteAllProjects, hasProjects }) {
   return (
     <header className="projects-header">
       <div className="projects-header-copy">
@@ -222,6 +243,15 @@ function ProjectHeader({ onNewProject }) {
         >
           + New project
         </button>
+        {hasProjects && (
+          <button
+            className="button-primary"
+            style={{ marginLeft: '10px', background: '#ef4444', border: '1px solid #dc2626' }}
+            onClick={onDeleteAllProjects}
+          >
+            Delete All
+          </button>
+        )}
       </div>
     </header>
   );

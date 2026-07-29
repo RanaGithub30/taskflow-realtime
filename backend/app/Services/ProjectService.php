@@ -53,4 +53,23 @@ class ProjectService
 
         $project->delete();
     }
+
+    public function destroyAll()
+    {
+        $user = auth()->user();
+
+        if (!$user) {
+            return null;
+        }
+
+        $projects = Project::where('user_id', $user->id)->get();
+
+        if ($projects->isEmpty()) {
+            return null;
+        }
+
+        foreach ($projects as $project) {
+            $project->delete();
+        }
+    }
 }

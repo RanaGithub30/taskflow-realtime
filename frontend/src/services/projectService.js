@@ -34,6 +34,16 @@ const deleteProject = async (projectId) => {
     return response.data;
 }
 
+const deleteAllProjects = async () => {
+    const token = getAuthToken();
+    const response = await apiDelete('/projects/all', {
+        headers: {
+            Authorization: `Bearer ${token}`,
+        },
+    });
+    return response.data;
+}
+
 const updateProject = async (projectId, data) => {
     const token = getAuthToken();
     const response = await apiPut(`/projects/${projectId}`, data, {
@@ -44,4 +54,4 @@ const updateProject = async (projectId, data) => {
     return response.data;
 }
 
-export { createProject, getAllProjects, deleteProject, updateProject };
+export { createProject, getAllProjects, deleteProject, deleteAllProjects, updateProject };

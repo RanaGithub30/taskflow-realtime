@@ -46,4 +46,10 @@ class ProjectManageController extends Controller
         $this->projectService->destroy($id);
         return response()->json(['message' => 'Project deleted successfully']);
     }
+
+    public function destroyAll()
+    {
+        $this->projectService->destroyAll();
+        return response()->json(['message' => 'All projects deleted successfully']);
+    }
 }
