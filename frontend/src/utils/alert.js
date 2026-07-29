@@ -6,6 +6,9 @@ export const showAlert = {
       icon: 'success',
       title,
       text,
+      showConfirmButton: false,
+      timer: 1200,
+      timerProgressBar: true,
     }),
 
   error: (text, title = 'Error') =>

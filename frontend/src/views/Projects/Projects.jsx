@@ -9,6 +9,7 @@ export default function Projects() {
   const [search, setSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState('all')
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const [selectedProject, setSelectedProject] = useState(null)
   const [projects, setProjects] = useState([])
 
   /** Fetch all projects */
@@ -19,10 +20,11 @@ export default function Projects() {
         const formattedProjects = data.map(project => ({
           id: project.id,
           name: project.name,
+          description: project.description ?? "",
           team: project.team,
           progress: project.progress ?? 0,
           status: project.status ?? "Planning",
-          dueDate: project.due_date ?? "",
+          dueDate: project.dueDate ?? project.due_date ?? "",
           members: project.members ?? [],
           budget: project.budget ?? "$0",
         }));
@@ -34,6 +36,21 @@ export default function Projects() {
       });
   }, []);
   /** Ends Here */
+
+  const handleOpenCreateModal = () => {
+    setSelectedProject(null)
+    setIsModalOpen(true)
+  }
+
+  const handleOpenEditModal = (project) => {
+    setSelectedProject(project)
+    setIsModalOpen(true)
+  }
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false)
+    setSelectedProject(null)
+  }
 
   /** Delete Project */
   const handleDeleteProject = async (projectId) => {
@@ -79,13 +96,27 @@ export default function Projects() {
 
       {
         isModalOpen && 
-        <NewProjectModal isOpen={isModalOpen} 
-        onClose={() => setIsModalOpen(false)}/>
+        <NewProjectModal
+          isOpen={isModalOpen}
+          project={selectedProject}
+          onClose={handleCloseModal}
+          onProjectSaved={(newProject) => {
+            setProjects((prevProjects) => {
+              const exists = prevProjects.some((project) => project.id === newProject.id)
+              if (exists) {
+                return prevProjects.map((project) =>
+                  project.id === newProject.id ? newProject : project
+                )
+              }
+              return [newProject, ...prevProjects]
+            })
+          }}
+        />
       }
 
       <main className="projects-main">
         <ProjectHeader
-          onNewProject={() => setIsModalOpen(true)}
+          onNewProject={handleOpenCreateModal}
         />
 
         <section className="projects-toolbar">
@@ -146,7 +177,10 @@ export default function Projects() {
                   <td>{project.budget}</td>
                   <td>
                     <div className="table-actions">
-                      <button className="table-action-btn table-action-btn--edit">
+                      <button
+                        className="table-action-btn table-action-btn--edit"
+                        onClick={() => handleOpenEditModal(project)}
+                      >
                         <span className="table-action-icon">✏️</span>
                         Edit
                       </button>

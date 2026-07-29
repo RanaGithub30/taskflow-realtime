@@ -1,16 +1,20 @@
-import { useState } from "react";
-import { createProject } from "../../services/projectService";
+import { useState, useEffect } from "react";
+import { createProject, updateProject } from "../../services/projectService";
 import { showAlert } from '../../utils/alert';
 
-export default function NewProjectModal({ isOpen, onClose }) {
-  const [formData, setFormData] = useState({
-    projectName: "",
-    description: "",
-    team: "",
-    status: "Planning",
-    budget: "",
-    dueDate: "",
-  });
+const getInitialFormData = (project) => ({
+  projectName: project?.name || "",
+  description: project?.description || "",
+  team: project?.team || "",
+  status: project?.status || "Planning",
+  budget: project?.budget ? String(project.budget).replace(/[$,\s]/g, "") : "",
+  dueDate: project?.dueDate || project?.due_date || "",
+});
+
+export default function NewProjectModal({ isOpen, onClose, project = null, onProjectSaved }) {
+  const [formData, setFormData] = useState(getInitialFormData(project));
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const isEditMode = Boolean(project);
 
   /** Validation Code Starts Here */
   const [errors, setErrors] = useState({});
@@ -34,6 +38,11 @@ export default function NewProjectModal({ isOpen, onClose }) {
 
   /** Validation Code Ends Here */
 
+  useEffect(() => {
+    setFormData(getInitialFormData(project));
+    setErrors({});
+  }, [project, isOpen]);
+
   if (!isOpen) return null;
 
   const handleChange = (e) => {
@@ -43,7 +52,7 @@ export default function NewProjectModal({ isOpen, onClose }) {
     });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const newErrors = {};
 
@@ -59,13 +68,54 @@ export default function NewProjectModal({ isOpen, onClose }) {
 
     if (hasErrors) return;
 
-    createProject(formData).then(async () => {
-      await showAlert.success('Project created successfully.');
-    }).catch(async (error) => {
-      await showAlert.error('Failed to create project. Please try again.');
-    });
+    setIsSubmitting(true);
 
-    onClose();
+    if (isEditMode) {
+      try {
+        const updatedProject = await updateProject(project.id, formData);
+        const formattedProject = {
+          id: updatedProject.id,
+          name: updatedProject.name,
+          description: updatedProject.description ?? "",
+          team: updatedProject.team,
+          progress: updatedProject.progress ?? 0,
+          status: updatedProject.status ?? "Planning",
+          dueDate: updatedProject.dueDate ?? updatedProject.due_date ?? "",
+          members: updatedProject.members ?? [],
+          budget: updatedProject.budget ?? "$0",
+        };
+        onProjectSaved?.(formattedProject);
+        onClose();
+        await showAlert.success('Project updated successfully.');
+      } catch (error) {
+        await showAlert.error('Failed to update project. Please try again.');
+      } finally {
+        setIsSubmitting(false);
+      }
+      return;
+    }
+
+    try {
+      const createdProject = await createProject(formData);
+      const formattedProject = {
+        id: createdProject.id,
+        name: createdProject.name,
+        description: createdProject.description ?? "",
+        team: createdProject.team,
+        progress: createdProject.progress ?? 0,
+        status: createdProject.status ?? "Planning",
+        dueDate: createdProject.dueDate ?? createdProject.due_date ?? "",
+        members: createdProject.members ?? [],
+        budget: createdProject.budget ?? "$0",
+      };
+      onProjectSaved?.(formattedProject);
+      onClose();
+      await showAlert.success('Project created successfully.');
+    } catch (error) {
+      await showAlert.error('Failed to create project. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -78,7 +128,7 @@ export default function NewProjectModal({ isOpen, onClose }) {
         onClick={(e) => e.stopPropagation()}
       >
         <div style={styles.header}>
-          <h2 style={{ margin: 0 }}>Create New Project</h2>
+          <h2 style={{ margin: 0 }}>{isEditMode ? 'Edit Project' : 'Create New Project'}</h2>
 
           <button style={styles.closeBtn} onClick={onClose}>
             ×
@@ -182,9 +232,10 @@ export default function NewProjectModal({ isOpen, onClose }) {
 
             <button
               type="submit"
-              style={styles.saveBtn}
+              style={{ ...styles.saveBtn, ...(isSubmitting ? styles.saveBtnDisabled : {}) }}
+              disabled={isSubmitting}
             >
-              Create Project
+              {isSubmitting ? 'Saving...' : (isEditMode ? 'Save Changes' : 'Create Project')}
             </button>
           </div>
         </form>
@@ -293,6 +344,11 @@ const styles = {
     color: "#fff",
     fontWeight: "600",
     boxShadow: "0 10px 20px rgba(67, 56, 202, 0.18)",
+  },
+
+  saveBtnDisabled: {
+    opacity: 0.7,
+    cursor: "not-allowed",
   },
 
   error: {

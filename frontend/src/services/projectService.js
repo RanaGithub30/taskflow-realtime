@@ -1,7 +1,9 @@
-import { apiPost, apiGet, apiDelete } from "./api";
+import { apiPost, apiGet, apiDelete, apiPut } from "./api";
+
+const getAuthToken = () => localStorage.getItem("access_token") || localStorage.getItem("authToken");
 
 const createProject = async (data) => {
-    const token = localStorage.getItem("access_token");
+    const token = getAuthToken();
     const response = await apiPost("/projects", data, {
     headers: {
             Authorization: `Bearer ${token}`,
@@ -11,7 +13,7 @@ const createProject = async (data) => {
 }
 
 const getAllProjects = async () => {
-    const token = localStorage.getItem("access_token");
+    const token = getAuthToken();
     const projects = await apiGet("/projects", {
         headers: {
             Authorization: `Bearer ${token}`,
@@ -23,7 +25,7 @@ const getAllProjects = async () => {
 }
 
 const deleteProject = async (projectId) => {
-    const token = localStorage.getItem("access_token");
+    const token = getAuthToken();
     const response = await apiDelete(`/projects/${projectId}`, {
         headers: {
             Authorization: `Bearer ${token}`,
@@ -32,4 +34,14 @@ const deleteProject = async (projectId) => {
     return response.data;
 }
 
-export { createProject, getAllProjects, deleteProject };
+const updateProject = async (projectId, data) => {
+    const token = getAuthToken();
+    const response = await apiPut(`/projects/${projectId}`, data, {
+        headers: {
+            Authorization: `Bearer ${token}`,
+        },
+    });
+    return response.data;
+}
+
+export { createProject, getAllProjects, deleteProject, updateProject };

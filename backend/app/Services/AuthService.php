@@ -22,7 +22,7 @@ class AuthService{
     public function login($request){
         $user = $this->getUser($request->email);
 
-        if($user && !\Hash::check($request->password, $user->password)){
+        if(!$user || !\Hash::check($request->password, $user->password)){
             return $this->commonResponse(null, StatusEnum::INVALID_CREDENTIALS, 401);
         }
 

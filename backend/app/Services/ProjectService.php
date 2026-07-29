@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Project;
 use App\Traits\ProjectManageTrait;
+use Illuminate\Http\Request;
 
 class ProjectService
 {
@@ -31,7 +32,14 @@ class ProjectService
     public function update(Request $request, $id)
     {
         $project = $this->getProjectById($id);
-        $project->update($request->all());
+
+        if (!$project) {
+            return null;
+        }
+
+        $data = $this->processData($request->all());
+        $project->update($data);
+
         return $project;
     }
 
