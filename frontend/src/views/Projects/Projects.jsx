@@ -153,7 +153,6 @@ export default function Projects() {
           </div>
 
           <div className="toolbar-actions">
-            <div className="toolbar-chip">Updated just now</div>
             <select
               className="projects-filter"
               value={statusFilter}
@@ -235,8 +234,6 @@ function ProjectHeader({ onNewProject, onDeleteAllProjects, hasProjects }) {
       </div>
 
       <div className="projects-header-actions">
-        <div className="header-pill">24 milestones this week</div>
-
         <button
           className="button-primary"
           onClick={onNewProject}
