@@ -1,7 +1,7 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import Navbar from '../../components/navbar'
-import { loginUser } from "../../services/userService";
+import { loginUser, getUserDetails } from "../../services/userService";
 import '../Auth/Auth.css'
 
 export default function Login() {
@@ -11,12 +11,41 @@ export default function Login() {
   const [password, setPassword] = useState('')
   const [statusMessage, setStatusMessage] = useState(location.state?.message || { type: '', text: '' })
 
+  useEffect(() => {
+    const params = new URLSearchParams(location.search)
+    const next = params.get('next')
+    if (!next) {
+      return
+    }
+
+    ;(async () => {
+      try {
+        const user = await getUserDetails().catch(() => null)
+        if (user) {
+          if (next.startsWith('http')) {
+            window.location.href = next
+          } else {
+            navigate(next)
+          }
+        }
+      } catch (err) {
+        // Not logged in, keep showing login page
+      }
+    })()
+  }, [location.search, navigate])
+
   async function handleSubmit(e) {
     e.preventDefault()
-    // TODO: Integrate with backend auth
+    const params = new URLSearchParams(location.search)
+    const nextDestination = params.get('next') || '/dashboard'
+
     try{
       await loginUser({ email, password })
-      navigate('/dashboard', {
+      if (nextDestination.startsWith('http')) {
+        window.location.href = nextDestination
+        return
+      }
+      navigate(nextDestination, {
         state: {
           message: {
             type: 'success',
@@ -88,7 +117,12 @@ export default function Login() {
 
         <div className="auth-footer">
           <span className="muted">Don’t have an account?</span>
-          <Link to="/register" className="link">Create an account</Link>
+          {(() => {
+            const params = new URLSearchParams(location.search)
+            const next = params.get('next')
+            const to = next ? `/register?next=${encodeURIComponent(next)}` : '/register'
+            return <Link to={to} className="link">Create an account</Link>
+          })()}
         </div>
       </div>
     </div>

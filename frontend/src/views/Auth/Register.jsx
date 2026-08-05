@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate, useLocation } from 'react-router-dom'
 import Navbar from '../../components/navbar'
 import '../Auth/Auth.css'
 import { createUser } from "../../services/userService";
@@ -11,6 +11,7 @@ export default function Register() {
   const [message, setMessage] = useState({ type: '', text: '' })
   const [isSubmitting, setIsSubmitting] = useState(false)
   const navigate = useNavigate()
+  const location = useLocation()
 
   async function handleSubmit(e) {
     e.preventDefault()
@@ -19,7 +20,10 @@ export default function Register() {
 
     try {
       await createUser({ name, email, password })
-      navigate('/login', {
+      const params = new URLSearchParams(location.search)
+      const next = params.get('next')
+      const loginPath = next ? `/login?next=${encodeURIComponent(next)}` : '/login'
+      navigate(loginPath, {
         state: {
           message: {
             type: 'success',

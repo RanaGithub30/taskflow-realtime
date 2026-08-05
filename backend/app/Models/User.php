@@ -22,6 +22,8 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        // teams are managed via pivot table `team_user`
+        'team_id',
     ];
 
     /**
@@ -45,5 +47,20 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    public function team()
+    {
+        return $this->belongsTo(Team::class, 'team_id');
+    }
+
+    public function teams()
+    {
+        return $this->belongsToMany(Team::class, 'team_user', 'user_id', 'team_id')->withTimestamps();
+    }
+
+    public function ownedTeams()
+    {
+        return $this->hasMany(Team::class, 'owner_id');
     }
 }
