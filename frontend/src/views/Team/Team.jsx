@@ -7,8 +7,6 @@ import { useNavigate, useLocation } from 'react-router-dom'
 import { showAlert } from '../../utils/alert'
 
 export default function Team() {
-  const [search, setSearch] = useState('')
-  const [roleFilter, setRoleFilter] = useState('all')
   const [showInviteModal, setShowInviteModal] = useState(false)
   const [selectedTeam, setSelectedTeam] = useState('')
   const [isAddingNewTeam, setIsAddingNewTeam] = useState(false)
@@ -121,23 +119,7 @@ export default function Team() {
     }
   }
 
-  const members = [
-    { id: 1, name: 'Rana Saha', role: 'Admin', team: 'Operations', email: 'rana@example.com', status: 'Active' },
-    { id: 2, name: 'John Doe', role: 'Developer', team: 'Backend', email: 'john@example.com', status: 'Active' },
-    { id: 3, name: 'Sarah Miller', role: 'QA Engineer', team: 'Testing', email: 'sarah@example.com', status: 'Active' },
-    { id: 4, name: 'Mike Johnson', role: 'DevOps', team: 'Infrastructure', email: 'mike@example.com', status: 'Away' },
-    { id: 5, name: 'Alex Lee', role: 'Product Manager', team: 'Product', email: 'alex@example.com', status: 'Active' },
-    { id: 6, name: 'Emily Wong', role: 'UI/UX Designer', team: 'Design', email: 'emily@example.com', status: 'Active' },
-  ]
-
   const teamsList = userTeams.map((team) => ({ id: team.id, name: team.name }))
-
-  const filteredMembers = members.filter((member) => {
-    const searchLower = search.toLowerCase()
-    const matchesSearch = member.name.toLowerCase().includes(searchLower) || member.team.toLowerCase().includes(searchLower)
-    const matchesRole = roleFilter === 'all' || member.role === roleFilter
-    return matchesSearch && matchesRole
-  })
 
   async function acceptInviteToken(token) {
     try {
@@ -171,9 +153,7 @@ export default function Team() {
       <main className="team-main">
         <header className="team-header">
           <div>
-            <p className="team-eyebrow">Team</p>
-            <h1>Team members</h1>
-            <p className="team-description">Monitor team activity, member roles, and collaboration status.</p>
+            
           </div>
           <button className="button-primary" onClick={async () => {
             try {
@@ -301,33 +281,6 @@ export default function Team() {
             </div>
           </div>
         )}
-
-        <section className="team-toolbar">
-          <div className="team-search-wrapper">
-            <input
-              type="text"
-              className="team-search"
-              placeholder="Search members..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-            />
-            <span className="search-icon">🔍</span>
-          </div>
-
-          <select
-            className="team-filter"
-            value={roleFilter}
-            onChange={(e) => setRoleFilter(e.target.value)}
-          >
-            <option value="all">All roles</option>
-            <option value="Admin">Admin</option>
-            <option value="Developer">Developer</option>
-            <option value="QA Engineer">QA Engineer</option>
-            <option value="DevOps">DevOps</option>
-            <option value="Product Manager">Product Manager</option>
-            <option value="UI/UX Designer">UI/UX Designer</option>
-          </select>
-        </section>
 
         <section className="team-list">
           <h2>Your teams</h2>
