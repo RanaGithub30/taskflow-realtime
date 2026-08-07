@@ -1,11 +1,12 @@
 export default function TaskModalFields({ values, onChange, projectOptions, errors }) {
   const today = new Date().toISOString().split('T')[0]
+  const selectedProject = values.project || projectOptions[0] || ''
 
   return (
     <>
       <label className="modal-field">
         <span>Select Project</span>
-        <select name="project" value={values.project} onChange={onChange} disabled={projectOptions.length === 0}>
+        <select name="project" value={selectedProject} onChange={onChange} disabled={projectOptions.length === 0}>
           {projectOptions.length === 0 ? (
             <option value="">No projects available</option>
           ) : (

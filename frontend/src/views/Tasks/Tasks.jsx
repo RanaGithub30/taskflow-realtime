@@ -2,97 +2,11 @@ import { useState, useEffect } from 'react'
 import Sidebar from '../../components/Sidebar'
 import TaskModalFields from './TaskModalFields'
 import { getAllProjects } from '../../services/projectService'
+import { createTask, getAllTasks } from '../../services/taskService'
 import '../Tasks/Tasks.css'
 
 const initialTasks = [
-  {
-    id: 1,
-    title: 'Design dashboard layout',
-    project: 'TaskFlow',
-    priority: 'High',
-    status: 'In Progress',
-    assignee: 'You',
-    dueDate: '2024-07-15',
-    description: 'Create responsive dashboard with widgets',
-    progress: 60,
-  },
-  {
-    id: 2,
-    title: 'Setup API endpoints',
-    project: 'Backend',
-    priority: 'High',
-    status: 'In Progress',
-    assignee: 'John',
-    dueDate: '2024-07-20',
-    description: 'Setup REST API with authentication',
-    progress: 45,
-  },
-  {
-    id: 3,
-    title: 'Write unit tests',
-    project: 'Backend',
-    priority: 'Medium',
-    status: 'Pending',
-    assignee: 'Sarah',
-    dueDate: '2024-07-25',
-    description: 'Write comprehensive unit tests',
-    progress: 0,
-  },
-  {
-    id: 4,
-    title: 'Database optimization',
-    project: 'Infrastructure',
-    priority: 'Medium',
-    status: 'Completed',
-    assignee: 'Mike',
-    dueDate: '2024-07-10',
-    description: 'Optimize database queries',
-    progress: 100,
-  },
-  {
-    id: 5,
-    title: 'Update documentation',
-    project: 'Docs',
-    priority: 'Low',
-    status: 'Pending',
-    assignee: 'Alex',
-    dueDate: '2024-07-30',
-    description: 'Update project documentation',
-    progress: 25,
-  },
-  {
-    id: 6,
-    title: 'Fix login bug',
-    project: 'Frontend',
-    priority: 'High',
-    status: 'In Progress',
-    assignee: 'You',
-    dueDate: '2024-07-18',
-    description: 'Fix authentication timeout issue',
-    progress: 75,
-  },
-  {
-    id: 7,
-    title: 'Deploy to staging',
-    project: 'DevOps',
-    priority: 'Medium',
-    status: 'Pending',
-    assignee: 'Mike',
-    dueDate: '2024-07-22',
-    description: 'Deploy latest build to staging',
-    progress: 10,
-  },
-  {
-    id: 8,
-    title: 'Code review',
-    project: 'Backend',
-    priority: 'Low',
-    status: 'In Progress',
-    assignee: 'Sarah',
-    dueDate: '2024-07-19',
-    description: 'Review pull requests',
-    progress: 50,
-  },
+ 
 ]
 
 function TaskModal({ isOpen, values, onChange, onSave, onClose, projectOptions, errors }) {
@@ -142,9 +56,14 @@ export default function Tasks() {
   const [formErrors, setFormErrors] = useState({})
 
   useEffect(() => {
-    getAllProjects()
-      .then((data) => {
-        const projectNames = data
+    const loadData = async () => {
+      try {
+        const [projectData, taskData] = await Promise.all([
+          getAllProjects(),
+          getAllTasks(),
+        ])
+
+        const projectNames = projectData
           .filter((project) => {
             const status = (project.status || '').toString().toLowerCase()
             return status !== 'completed' && status !== 'review'
@@ -152,17 +71,35 @@ export default function Tasks() {
           .map((project) => project.name || project.title || '')
           .filter(Boolean)
         setProjects(projectNames)
-      })
-      .catch((error) => {
-        console.error('Failed to load projects for task modal:', error)
-      })
+
+        const normalizedTasks = (Array.isArray(taskData) ? taskData : []).map((task) => ({
+          id: task.id,
+          title: task.title,
+          project: task.project || 'Unassigned',
+          priority: task.priority || 'Medium',
+          status: task.status || 'Pending',
+          dueDate: task.deadline,
+          assignee: task.assignee || 'You',
+          description: task.description || '',
+          progress: task.progress || 0,
+        }))
+
+        setTasks(normalizedTasks)
+      } catch (error) {
+        console.error('Failed to load tasks data:', error)
+      }
+    }
+
+    loadData()
   }, [])
 
   const projectOptions = projects
 
   const handleOpenModal = () => {
+    const defaultProject = projectOptions[0] || ''
+
     setFormValues({
-      project: projectOptions[0] || '',
+      project: defaultProject,
       title: '',
       priority: 'Medium',
       deadline: '',
@@ -184,10 +121,11 @@ export default function Tasks() {
 
   const validateForm = () => {
     const errors = {}
+    const selectedProject = String(formValues.project ?? '').trim()
 
-    if (!formValues.project.trim()) {
-      errors.project = 'Please select a project.'
-    }
+    // if (!selectedProject) {
+    //   errors.project = 'Please select a project.'
+    // }
 
     if (!formValues.title.trim()) {
       errors.title = 'Please provide a task name.'
@@ -212,25 +150,44 @@ export default function Tasks() {
     return Object.keys(errors).length === 0
   }
 
-  const handleSaveTask = () => {
+  const handleSaveTask = async () => {
     if (!validateForm()) {
       return
     }
 
-    const newTask = {
-      id: Date.now(),
-      title: formValues.title,
-      project: formValues.project,
-      priority: formValues.priority,
-      status: formValues.status,
-      dueDate: formValues.deadline,
-      assignee: 'You',
-      description: '',
-      progress: 0,
-    }
+    try {
+      const payload = {
+        title: formValues.title,
+        project: formValues.project,
+        priority: formValues.priority,
+        status: formValues.status,
+        deadline: formValues.deadline,
+        description: '',
+        progress: 0,
+      }
 
-    setTasks((prevTasks) => [newTask, ...prevTasks])
-    setIsModalOpen(false)
+      const createdTask = await createTask(payload)
+
+      const newTask = {
+        id: createdTask.id || Date.now(),
+        title: createdTask.title || formValues.title,
+        project: createdTask.project || formValues.project,
+        priority: createdTask.priority || formValues.priority,
+        status: createdTask.status || formValues.status,
+        dueDate: createdTask.deadline || formValues.deadline,
+        assignee: 'You',
+        description: createdTask.description || '',
+        progress: createdTask.progress || 0,
+      }
+
+      setTasks((prevTasks) => [newTask, ...prevTasks])
+      setIsModalOpen(false)
+      setFormErrors({})
+    } catch (error) {
+      console.error('Failed to create task:', error)
+      const message = error?.response?.data?.message || error?.response?.data?.error || error?.message || 'Unable to save the task right now.'
+      alert(message)
+    }
   }
 
   const filteredTasks = tasks.filter((task) => {
@@ -370,16 +327,29 @@ export default function Tasks() {
                         </span>
                       </div>
 
-                      <p className="task-card-description">{task.description}</p>
+                      <p className="task-card-description">
+                        {task.description || 'No additional details provided.'}
+                      </p>
 
                       <div className="task-card-meta">
                         <div className="meta-item">
                           <span className="meta-label">Project:</span>
-                          <span className="meta-value">{task.project}</span>
+                          <span className="meta-value">{task.project || 'Unassigned'}</span>
                         </div>
                         <div className="meta-item">
                           <span className="meta-label">Due:</span>
                           <span className="meta-value">{task.dueDate ? new Date(task.dueDate).toLocaleDateString() : '—'}</span>
+                        </div>
+                      </div>
+
+                      <div className="task-card-meta">
+                        <div className="meta-item">
+                          <span className="meta-label">Priority:</span>
+                          <span className="meta-value">{task.priority || 'Medium'}</span>
+                        </div>
+                        <div className="meta-item">
+                          <span className="meta-label">Assignee:</span>
+                          <span className="meta-value">{task.assignee || 'You'}</span>
                         </div>
                       </div>
 
@@ -391,9 +361,9 @@ export default function Tasks() {
                       </div>
 
                       <div className="task-card-footer">
-                        <div className="task-assignee-badge">{task.assignee.substring(0, 2).toUpperCase()}</div>
-                        <span className={`status-badge status-${task.status.toLowerCase().replace(' ', '-')}`}>
-                          {task.status}
+                        <div className="task-assignee-badge">{(task.assignee || 'You').substring(0, 2).toUpperCase()}</div>
+                        <span className={`status-badge status-${(task.status || 'Pending').toLowerCase().replace(' ', '-')}`}>
+                          {task.status || 'Pending'}
                         </span>
                       </div>
 
@@ -469,53 +439,6 @@ export default function Tasks() {
             )}
           </div>
 
-          <aside className="tasks-sidebar">
-            <div className="panel-card">
-              <p className="panel-title">Upcoming Deadlines</p>
-              <div className="deadline-item">
-                <div>
-                  <p className="deadline-title">Design dashboard layout</p>
-                  <p className="deadline-meta">Due 7/15/2024 · TaskFlow</p>
-                </div>
-                <span className="deadline-badge deadline-high">High</span>
-              </div>
-              <div className="deadline-item">
-                <div>
-                  <p className="deadline-title">Fix login bug</p>
-                  <p className="deadline-meta">Due 7/18/2024 · Frontend</p>
-                </div>
-                <span className="deadline-badge deadline-high">High</span>
-              </div>
-              <div className="deadline-item">
-                <div>
-                  <p className="deadline-title">Setup API endpoints</p>
-                  <p className="deadline-meta">Due 7/20/2024 · Backend</p>
-                </div>
-                <span className="deadline-badge deadline-medium">Medium</span>
-              </div>
-            </div>
-
-            <div className="panel-card">
-              <p className="panel-title">Focus This Week</p>
-              <div className="focus-row">
-                <div>
-                  <p className="focus-label">Tasks due soon</p>
-                  <p className="focus-value">3</p>
-                </div>
-                <div>
-                  <p className="focus-label">Open tasks</p>
-                  <p className="focus-value">{tasks.length}</p>
-                </div>
-              </div>
-              <div className="focus-progress-wrapper">
-                <p className="focus-progress-title">Team progress</p>
-                <div className="focus-progress-bar">
-                  <div className="focus-progress-fill" style={{ width: '68%' }}></div>
-                </div>
-                <span className="focus-progress-text">68% complete</span>
-              </div>
-            </div>
-          </aside>
         </div>
       </main>
     </div>

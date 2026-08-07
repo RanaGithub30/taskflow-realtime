@@ -6,6 +6,7 @@ use App\Http\Controllers\api\UserAuthManageController;
 use App\Http\Controllers\api\ProjectManageController;
 use App\Http\Controllers\api\InviteController;
 use App\Http\Controllers\api\TeamManageController;
+use App\Http\Controllers\Api\TaskController;
 
 Route::prefix('v1')->group(function () {
     Route::post('/register', [UserAuthManageController::class, 'register']);
@@ -45,5 +46,8 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::delete('/all', 'destroyAll');
             Route::delete('/{project}', 'destroy');
         });
+
+        Route::get('/tasks', [TaskController::class, 'index']);
+        Route::post('/tasks', [TaskController::class, 'store']);
     });
 });

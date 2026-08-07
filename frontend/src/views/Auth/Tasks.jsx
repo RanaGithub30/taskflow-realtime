@@ -3,96 +3,7 @@ import Sidebar from '../../components/Sidebar'
 import TaskModalFields from './TaskModalFields'
 import './Tasks.css'
 
-const initialTasks = [
-  {
-    id: 1,
-    title: 'Design dashboard layout',
-    project: 'TaskFlow',
-    priority: 'High',
-    status: 'In Progress',
-    assignee: 'You',
-    dueDate: '2024-07-15',
-    description: 'Create responsive dashboard with widgets',
-    progress: 60,
-  },
-  {
-    id: 2,
-    title: 'Setup API endpoints',
-    project: 'Backend',
-    priority: 'High',
-    status: 'In Progress',
-    assignee: 'John',
-    dueDate: '2024-07-20',
-    description: 'Setup REST API with authentication',
-    progress: 45,
-  },
-  {
-    id: 3,
-    title: 'Write unit tests',
-    project: 'Backend',
-    priority: 'Medium',
-    status: 'Pending',
-    assignee: 'Sarah',
-    dueDate: '2024-07-25',
-    description: 'Write comprehensive unit tests',
-    progress: 0,
-  },
-  {
-    id: 4,
-    title: 'Database optimization',
-    project: 'Infrastructure',
-    priority: 'Medium',
-    status: 'Completed',
-    assignee: 'Mike',
-    dueDate: '2024-07-10',
-    description: 'Optimize database queries',
-    progress: 100,
-  },
-  {
-    id: 5,
-    title: 'Update documentation',
-    project: 'Docs',
-    priority: 'Low',
-    status: 'Pending',
-    assignee: 'Alex',
-    dueDate: '2024-07-30',
-    description: 'Update project documentation',
-    progress: 25,
-  },
-  {
-    id: 6,
-    title: 'Fix login bug',
-    project: 'Frontend',
-    priority: 'High',
-    status: 'In Progress',
-    assignee: 'You',
-    dueDate: '2024-07-18',
-    description: 'Fix authentication timeout issue',
-    progress: 75,
-  },
-  {
-    id: 7,
-    title: 'Deploy to staging',
-    project: 'DevOps',
-    priority: 'Medium',
-    status: 'Pending',
-    assignee: 'Mike',
-    dueDate: '2024-07-22',
-    description: 'Deploy latest build to staging',
-    progress: 10,
-  },
-  {
-    id: 8,
-    title: 'Code review',
-    project: 'Backend',
-    priority: 'Low',
-    status: 'In Progress',
-    assignee: 'Sarah',
-    dueDate: '2024-07-19',
-    description: 'Review pull requests',
-    progress: 50,
-  },
-]
+const initialTasks = []
 
 function TaskModal({ isOpen, values, onChange, onSave, onClose, projectOptions }) {
   if (!isOpen) return null
@@ -140,8 +51,10 @@ export default function Tasks() {
   const projectOptions = Array.from(new Set(tasks.map((task) => task.project)))
 
   const handleOpenModal = () => {
+    const defaultProject = projectOptions[0] || 'TaskFlow'
+
     setFormValues({
-      project: projectOptions[0] || 'TaskFlow',
+      project: defaultProject,
       title: '',
       priority: 'Medium',
       deadline: '',
@@ -162,6 +75,11 @@ export default function Tasks() {
   const handleSaveTask = () => {
     if (!formValues.title.trim()) {
       alert('Please provide a task name.')
+      return
+    }
+
+    if (!String(formValues.project ?? '').trim()) {
+      alert('Please select a project.')
       return
     }
 
