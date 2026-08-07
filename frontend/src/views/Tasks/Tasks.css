@@ -596,6 +596,13 @@
   font-size: 0.95rem;
 }
 
+.field-error {
+  color: #b91c1c;
+  font-size: 0.82rem;
+  margin-top: 0.4rem;
+  line-height: 1.25;
+}
+
 .modal-row {
   display: grid;
   grid-template-columns: 1fr 1fr;

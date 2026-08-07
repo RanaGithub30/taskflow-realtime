@@ -1,7 +1,8 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Sidebar from '../../components/Sidebar'
 import TaskModalFields from './TaskModalFields'
-import './Tasks.css'
+import { getAllProjects } from '../../services/projectService'
+import '../Tasks/Tasks.css'
 
 const initialTasks = [
   {
@@ -94,7 +95,7 @@ const initialTasks = [
   },
 ]
 
-function TaskModal({ isOpen, values, onChange, onSave, onClose, projectOptions }) {
+function TaskModal({ isOpen, values, onChange, onSave, onClose, projectOptions, errors }) {
   if (!isOpen) return null
 
   return (
@@ -110,6 +111,7 @@ function TaskModal({ isOpen, values, onChange, onSave, onClose, projectOptions }
           values={values}
           onChange={onChange}
           projectOptions={projectOptions}
+          errors={errors}
         />
       </div>
 
@@ -129,24 +131,44 @@ export default function Tasks() {
   const [filterPriority, setFilterPriority] = useState('all')
   const [viewMode, setViewMode] = useState('grid')
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const [projects, setProjects] = useState([])
   const [formValues, setFormValues] = useState({
-    project: initialTasks[0]?.project || 'TaskFlow',
+    project: '',
     title: '',
     priority: 'Medium',
     deadline: '',
     status: 'Pending',
   })
+  const [formErrors, setFormErrors] = useState({})
 
-  const projectOptions = Array.from(new Set(tasks.map((task) => task.project)))
+  useEffect(() => {
+    getAllProjects()
+      .then((data) => {
+        const projectNames = data
+          .filter((project) => {
+            const status = (project.status || '').toString().toLowerCase()
+            return status !== 'completed' && status !== 'review'
+          })
+          .map((project) => project.name || project.title || '')
+          .filter(Boolean)
+        setProjects(projectNames)
+      })
+      .catch((error) => {
+        console.error('Failed to load projects for task modal:', error)
+      })
+  }, [])
+
+  const projectOptions = projects
 
   const handleOpenModal = () => {
     setFormValues({
-      project: projectOptions[0] || 'TaskFlow',
+      project: projectOptions[0] || '',
       title: '',
       priority: 'Medium',
       deadline: '',
       status: 'Pending',
     })
+    setFormErrors({})
     setIsModalOpen(true)
   }
 
@@ -157,11 +179,41 @@ export default function Tasks() {
   const handleFormChange = (event) => {
     const { name, value } = event.target
     setFormValues((prev) => ({ ...prev, [name]: value }))
+    setFormErrors((prev) => ({ ...prev, [name]: '' }))
+  }
+
+  const validateForm = () => {
+    const errors = {}
+
+    if (!formValues.project.trim()) {
+      errors.project = 'Please select a project.'
+    }
+
+    if (!formValues.title.trim()) {
+      errors.title = 'Please provide a task name.'
+    }
+
+    if (!formValues.priority.trim()) {
+      errors.priority = 'Please select a priority.'
+    }
+
+    if (!formValues.deadline.trim()) {
+      errors.deadline = 'Please choose a deadline.'
+    }
+    const today = new Date().toISOString().split('T')[0]
+    if (formValues.deadline && formValues.deadline < today) {
+      errors.deadline = 'Deadline cannot be in the past.'
+    }
+    if (!formValues.status.trim()) {
+      errors.status = 'Please select a status.'
+    }
+
+    setFormErrors(errors)
+    return Object.keys(errors).length === 0
   }
 
   const handleSaveTask = () => {
-    if (!formValues.title.trim()) {
-      alert('Please provide a task name.')
+    if (!validateForm()) {
       return
     }
 
@@ -218,7 +270,8 @@ export default function Tasks() {
         onChange={handleFormChange}
         onSave={handleSaveTask}
         onClose={handleCloseModal}
-        projectOptions={projectOptions.length ? projectOptions : ['TaskFlow', 'Backend', 'Frontend']}
+        projectOptions={projectOptions}
+        errors={formErrors}
       />
 
       <main className="tasks-main">
