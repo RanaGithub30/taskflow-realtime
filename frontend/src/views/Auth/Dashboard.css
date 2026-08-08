@@ -153,6 +153,28 @@
   font-size: 0.95rem;
 }
 
+.dashboard-feedback,
+.dashboard-empty-state {
+  margin: 0;
+  padding: 2rem 1rem;
+  text-align: center;
+  color: #64748b;
+}
+
+.dashboard-feedback--error {
+  color: #b91c1c;
+}
+
+.dashboard-empty-state {
+  display: grid;
+  justify-items: center;
+  gap: 1rem;
+}
+
+.dashboard-empty-state p {
+  margin: 0;
+}
+
 .section-link {
   display: inline-flex;
   align-items: center;
@@ -320,9 +342,6 @@
   .dashboard-grid {
     grid-template-columns: 1fr;
   }
-}
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 1.5rem;
 }
 
 .dashboard-card {

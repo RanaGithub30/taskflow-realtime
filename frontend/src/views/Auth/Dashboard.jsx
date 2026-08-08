@@ -1,43 +1,74 @@
-import { useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import Sidebar from '../../components/Sidebar'
+import { getAllTasks } from '../../services/taskService'
+import { apiGet } from '../../services/api'
 import './Dashboard.css'
 
-export default function Dashboard() {
-  const [stats] = useState([
-    { label: 'Total Tasks', value: '48', icon: '✓', color: '#4338ca' },
-    { label: 'In Progress', value: '12', icon: '⏳', color: '#6366f1' },
-    { label: 'Completed', value: '32', icon: '✔️', color: '#10b981' },
-    { label: 'Team Members', value: '6', icon: '👥', color: '#f59e0b' },
-  ])
+const normalizeTasks = (data) => (Array.isArray(data) ? data : []).map((task) => ({
+  id: task.id,
+  title: task.title || 'Untitled task',
+  project: task.project || 'Unassigned',
+  priority: task.priority || 'Medium',
+  status: task.status || 'Pending',
+  assignee: task.assignee || 'You',
+}))
 
-  const [recentTasks] = useState([
-    { id: 1, title: 'Design dashboard layout', project: 'TaskFlow', priority: 'High', status: 'In Progress', assignee: 'You' },
-    { id: 2, title: 'Setup API endpoints', project: 'Backend', priority: 'High', status: 'In Progress', assignee: 'John' },
-    { id: 3, title: 'Write unit tests', project: 'Backend', priority: 'Medium', status: 'Pending', assignee: 'Sarah' },
-    { id: 4, title: 'Database optimization', project: 'Infrastructure', priority: 'Medium', status: 'Completed', assignee: 'Mike' },
-    { id: 5, title: 'Update documentation', project: 'Docs', priority: 'Low', status: 'Pending', assignee: 'Alex' },
-  ])
+export default function Dashboard() {
+  const navigate = useNavigate()
+  const [tasks, setTasks] = useState([])
+  const [teamMembers, setTeamMembers] = useState(0)
+  const [isLoading, setIsLoading] = useState(true)
+  const [loadError, setLoadError] = useState('')
+
+  useEffect(() => {
+    let isMounted = true
+
+    const loadDashboard = async () => {
+      setIsLoading(true)
+      setLoadError('')
+
+      try {
+        const [taskData, teamsResponse] = await Promise.all([
+          getAllTasks(),
+          apiGet('/teams').catch(() => null),
+        ])
+
+        if (!isMounted) return
+
+        setTasks(normalizeTasks(taskData))
+        const teams = teamsResponse?.data?.data ?? []
+        setTeamMembers(teams.reduce((total, team) => total + Number(team.member_count ?? team.members?.length ?? 0), 0))
+      } catch (error) {
+        if (!isMounted) return
+        console.error('Failed to load dashboard data:', error)
+        setLoadError('Unable to load your dashboard data. Please refresh and try again.')
+      } finally {
+        if (isMounted) setIsLoading(false)
+      }
+    }
+
+    loadDashboard()
+    return () => { isMounted = false }
+  }, [])
+
+  const stats = useMemo(() => [
+    { label: 'Total Tasks', value: tasks.length, icon: '✓', color: '#4338ca' },
+    { label: 'In Progress', value: tasks.filter((task) => task.status === 'In Progress').length, icon: '⌛', color: '#6366f1' },
+    { label: 'Completed', value: tasks.filter((task) => task.status === 'Completed').length, icon: '✓', color: '#10b981' },
+    { label: 'Team Members', value: teamMembers, icon: '👥', color: '#f59e0b' },
+  ], [tasks, teamMembers])
+
+  const recentTasks = tasks.slice(0, 5)
 
   return (
     <div className="dashboard-layout">
       <Sidebar isAuthenticated={true} />
-      
-      <main className="dashboard-main">
-        <header className="dashboard-header">
-          <div>
-            <p className="dashboard-eyebrow">Overview</p>
-            <h1 className="dashboard-title">Dashboard</h1>
-            <p className="dashboard-description">Welcome back! Here's your tasks overview and team performance summary.</p>
-          </div>
-          <div className="dashboard-actions">
-            <button className="button-secondary">Review report</button>
-            <button className="button-primary">+ New Task</button>
-          </div>
-        </header>
 
-        <section className="dashboard-stats">
-          {stats.map((stat, index) => (
-            <div key={index} className="stat-card">
+      <main className="dashboard-main">
+        <section className="dashboard-stats" aria-busy={isLoading}>
+          {stats.map((stat) => (
+            <div key={stat.label} className="stat-card">
               <div className="stat-header">
                 <span className="stat-icon" style={{ backgroundColor: `${stat.color}20` }}>
                   {stat.icon}
@@ -45,7 +76,7 @@ export default function Dashboard() {
                 <p className="stat-label">{stat.label}</p>
               </div>
               <p className="stat-value" style={{ color: stat.color }}>
-                {stat.value}
+                {isLoading ? '—' : stat.value}
               </p>
             </div>
           ))}
@@ -55,68 +86,50 @@ export default function Dashboard() {
           <div className="section-header">
             <div>
               <h2>Recent Tasks</h2>
-              <p className="section-description">Tasks currently being tracked across projects.</p>
+              <p className="section-description">Your five most recently created tasks.</p>
             </div>
-            <button className="button-secondary">View all</button>
+            <button className="button-secondary" type="button" onClick={() => navigate('/tasks')}>View all</button>
           </div>
 
-          <div className="tasks-table-wrapper">
-            <table className="tasks-table">
-              <thead>
-                <tr>
-                  <th>Task Title</th>
-                  <th>Project</th>
-                  <th>Priority</th>
-                  <th>Status</th>
-                  <th>Assigned to</th>
-                  <th>Action</th>
-                </tr>
-              </thead>
-              <tbody>
-                {recentTasks.map(task => (
-                  <tr key={task.id}>
-                    <td className="task-title">{task.title}</td>
-                    <td className="task-project">{task.project}</td>
-                    <td>
-                      <span className={`badge badge-${task.priority.toLowerCase()}`}>
-                        {task.priority}
-                      </span>
-                    </td>
-                    <td>
-                      <span className={`badge badge-${task.status.toLowerCase().replace(' ', '-')}`}>
-                        {task.status}
-                      </span>
-                    </td>
-                    <td className="task-assignee">{task.assignee}</td>
-                    <td className="task-action">
-                      <button className="action-btn">View</button>
-                    </td>
+          {loadError ? (
+            <p className="dashboard-feedback dashboard-feedback--error">{loadError}</p>
+          ) : isLoading ? (
+            <p className="dashboard-feedback">Loading dashboard data…</p>
+          ) : recentTasks.length === 0 ? (
+            <div className="dashboard-empty-state">
+              <p>No tasks yet. Create your first task to see it here.</p>
+              <button className="button-secondary" type="button" onClick={() => navigate('/tasks')}>Go to Tasks</button>
+            </div>
+          ) : (
+            <div className="tasks-table-wrapper">
+              <table className="tasks-table">
+                <thead>
+                  <tr>
+                    <th>Task Title</th>
+                    <th>Project</th>
+                    <th>Priority</th>
+                    <th>Status</th>
+                    <th>Assigned to</th>
+                    <th>Action</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </section>
-
-        <section className="dashboard-grid">
-          <div className="dashboard-card">
-            <div className="card-header">
-              <h3>Task Distribution</h3>
-              <button className="button-secondary">Details</button>
+                </thead>
+                <tbody>
+                  {recentTasks.map((task) => (
+                    <tr key={task.id}>
+                      <td className="task-title">{task.title}</td>
+                      <td className="task-project">{task.project}</td>
+                      <td><span className={`badge badge-${task.priority.toLowerCase()}`}>{task.priority}</span></td>
+                      <td><span className={`badge badge-${task.status.toLowerCase().replaceAll(' ', '-')}`}>{task.status}</span></td>
+                      <td className="task-assignee">{task.assignee}</td>
+                      <td className="task-action">
+                        <button className="action-btn" type="button" onClick={() => navigate('/tasks')}>View</button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
-            <div className="chart-placeholder">
-              <p>📊 Task distribution chart</p>
-            </div>
-          </div>
-
-          <aside className="dashboard-summary-panel panel-card">
-            <h3 className="panel-title">Team Insights</h3>
-            <ul className="insights-list">
-              <li>John completed 3 tasks today.</li>
-              <li>Sarah started a new project initiative.</li>
-              <li>Mike updated documentation.</li>
-            </ul>
-          </aside>
+          )}
         </section>
       </main>
     </div>
