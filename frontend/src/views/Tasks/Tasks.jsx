@@ -2,21 +2,25 @@ import { useState, useEffect } from 'react'
 import Sidebar from '../../components/Sidebar'
 import TaskModalFields from './TaskModalFields'
 import { getAllProjects } from '../../services/projectService'
-import { createTask, getAllTasks } from '../../services/taskService'
+import { createTask, deleteTask, getAllTasks, updateTask } from '../../services/taskService'
+import { showAlert } from '../../utils/alert'
 import '../Tasks/Tasks.css'
 
 const initialTasks = [
  
 ]
 
-function TaskModal({ isOpen, values, onChange, onSave, onClose, projectOptions, errors }) {
+function TaskModal({ isOpen, values, onChange, onSave, onClose, projectOptions, errors, isEditing }) {
   if (!isOpen) return null
 
   return (
     <div className="modal-overlay" onClick={onClose}>
-      <div className="modal-card" onClick={(e) => e.stopPropagation()}>
+      <form className="modal-card" onClick={(e) => e.stopPropagation()} onSubmit={(event) => {
+        event.preventDefault()
+        onSave()
+      }}>
         <div className="modal-card-header">
-          <h2>Create Task</h2>
+          <h2>{isEditing ? 'Edit Task' : 'Create Task'}</h2>
           <button className="modal-close" onClick={onClose} type="button">×</button>
         </div>
 
@@ -31,9 +35,9 @@ function TaskModal({ isOpen, values, onChange, onSave, onClose, projectOptions, 
 
         <div className="modal-card-footer">
           <button className="button-secondary" type="button" onClick={onClose}>Cancel</button>
-          <button className="button-primary" type="button" onClick={onSave}>Save Task</button>
+          <button className="button-primary" type="submit">{isEditing ? 'Update Task' : 'Save Task'}</button>
         </div>
-      </div>
+      </form>
     </div>
   )
 }
@@ -54,6 +58,8 @@ export default function Tasks() {
     status: 'Pending',
   })
   const [formErrors, setFormErrors] = useState({})
+  const [deletingTaskId, setDeletingTaskId] = useState(null)
+  const [editingTaskId, setEditingTaskId] = useState(null)
 
   useEffect(() => {
     const loadData = async () => {
@@ -106,11 +112,26 @@ export default function Tasks() {
       status: 'Pending',
     })
     setFormErrors({})
+    setEditingTaskId(null)
+    setIsModalOpen(true)
+  }
+
+  const handleEditTask = (task) => {
+    setFormValues({
+      project: task.project === 'Unassigned' ? '' : task.project || '',
+      title: task.title || '',
+      priority: task.priority || 'Medium',
+      deadline: task.dueDate ? task.dueDate.slice(0, 10) : '',
+      status: task.status || 'Pending',
+    })
+    setFormErrors({})
+    setEditingTaskId(task.id)
     setIsModalOpen(true)
   }
 
   const handleCloseModal = () => {
     setIsModalOpen(false)
+    setEditingTaskId(null)
   }
 
   const handleFormChange = (event) => {
@@ -166,27 +187,54 @@ export default function Tasks() {
         progress: 0,
       }
 
-      const createdTask = await createTask(payload)
+      const isEditing = editingTaskId !== null
+      const savedTask = isEditing
+        ? await updateTask(editingTaskId, payload)
+        : await createTask(payload)
 
-      const newTask = {
-        id: createdTask.id || Date.now(),
-        title: createdTask.title || formValues.title,
-        project: createdTask.project || formValues.project,
-        priority: createdTask.priority || formValues.priority,
-        status: createdTask.status || formValues.status,
-        dueDate: createdTask.deadline || formValues.deadline,
+      const taskDetails = {
+        id: savedTask.id || editingTaskId || Date.now(),
+        title: savedTask.title || formValues.title,
+        project: savedTask.project || formValues.project || 'Unassigned',
+        priority: savedTask.priority || formValues.priority,
+        status: savedTask.status || formValues.status,
+        dueDate: savedTask.deadline || formValues.deadline,
         assignee: 'You',
-        description: createdTask.description || '',
-        progress: createdTask.progress || 0,
+        description: savedTask.description || '',
+        progress: savedTask.progress || 0,
       }
 
-      setTasks((prevTasks) => [newTask, ...prevTasks])
-      setIsModalOpen(false)
+      setTasks((prevTasks) => isEditing
+        ? prevTasks.map((task) => (task.id === editingTaskId ? { ...task, ...taskDetails } : task))
+        : [taskDetails, ...prevTasks])
+      handleCloseModal()
       setFormErrors({})
+      showAlert.success(isEditing ? 'Task updated successfully.' : 'Task created successfully.')
     } catch (error) {
-      console.error('Failed to create task:', error)
+      console.error('Failed to save task:', error)
       const message = error?.response?.data?.message || error?.response?.data?.error || error?.message || 'Unable to save the task right now.'
-      alert(message)
+      showAlert.error(message)
+    }
+  }
+
+  const handleDeleteTask = async (task) => {
+    const result = await showAlert.confirm(
+      `This will permanently delete “${task.title}”.`,
+      'Delete task?'
+    )
+
+    if (!result.isConfirmed) return
+
+    try {
+      setDeletingTaskId(task.id)
+      await deleteTask(task.id)
+      setTasks((currentTasks) => currentTasks.filter((currentTask) => currentTask.id !== task.id))
+      showAlert.success('Task deleted successfully.')
+    } catch (error) {
+      console.error('Failed to delete task:', error)
+      showAlert.error(error?.response?.data?.message || 'Unable to delete the task. Please try again.')
+    } finally {
+      setDeletingTaskId(null)
     }
   }
 
@@ -229,6 +277,7 @@ export default function Tasks() {
         onClose={handleCloseModal}
         projectOptions={projectOptions}
         errors={formErrors}
+        isEditing={editingTaskId !== null}
       />
 
       <main className="tasks-main">
@@ -361,16 +410,22 @@ export default function Tasks() {
                       </div>
 
                       <div className="task-card-footer">
-                        <div className="task-assignee-badge">{(task.assignee || 'You').substring(0, 2).toUpperCase()}</div>
                         <span className={`status-badge status-${(task.status || 'Pending').toLowerCase().replace(' ', '-')}`}>
                           {task.status || 'Pending'}
                         </span>
                       </div>
 
                       <div className="task-card-actions">
-                        <button className="action-icon" title="Edit">✏️</button>
-                        <button className="action-icon" title="View details">👁️</button>
-                        <button className="action-icon" title="Delete">🗑️</button>
+                        <button className="action-icon" title="Edit" type="button" onClick={() => handleEditTask(task)}>✏️</button>
+                        <button
+                          className="action-icon"
+                          title="Delete"
+                          type="button"
+                          onClick={() => handleDeleteTask(task)}
+                          disabled={deletingTaskId === task.id}
+                        >
+                          🗑️
+                        </button>
                       </div>
                     </div>
                   ))
@@ -422,9 +477,16 @@ export default function Tasks() {
                           </td>
                           <td>{task.dueDate ? new Date(task.dueDate).toLocaleDateString() : '—'}</td>
                           <td className="table-actions">
-                            <button className="table-action-btn" title="Edit">✏️</button>
-                            <button className="table-action-btn" title="View">👁️</button>
-                            <button className="table-action-btn" title="Delete">🗑️</button>
+                            <button className="table-action-btn" title="Edit" type="button" onClick={() => handleEditTask(task)}>✏️</button>
+                            <button
+                              className="table-action-btn"
+                              title="Delete"
+                              type="button"
+                              onClick={() => handleDeleteTask(task)}
+                              disabled={deletingTaskId === task.id}
+                            >
+                              🗑️
+                            </button>
                           </td>
                         </tr>
                       ))

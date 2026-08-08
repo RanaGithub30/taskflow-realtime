@@ -15,4 +15,9 @@ class Task extends Model
     {
         return $this->belongsTo(User::class);
     }
+
+    public function deadlineChanges()
+    {
+        return $this->hasMany(TaskDeadlineChange::class)->latest();
+    }
 }

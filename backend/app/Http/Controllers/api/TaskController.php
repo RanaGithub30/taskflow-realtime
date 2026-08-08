@@ -36,4 +36,42 @@ class TaskController extends Controller
 
         return response()->json($task, 201);
     }
+
+    public function destroy(int $task): JsonResponse
+    {
+        $this->taskService->destroy($task);
+
+        return response()->json([
+            'message' => 'Task deleted successfully.',
+        ]);
+    }
+
+    public function update(Request $request, int $task): JsonResponse
+    {
+        $validated = $request->validate([
+            'title' => ['required', 'string', 'max:255'],
+            'project' => ['nullable', 'string', 'max:255'],
+            'priority' => ['nullable', 'string', 'max:255'],
+            'status' => ['nullable', 'string', 'max:255'],
+            'deadline' => ['nullable', 'date'],
+            'description' => ['nullable', 'string'],
+            'progress' => ['nullable', 'integer', 'min:0', 'max:100'],
+        ]);
+
+        return response()->json($this->taskService->update($task, $validated));
+    }
+
+    public function updateDeadline(Request $request, int $task): JsonResponse
+    {
+        $validated = $request->validate([
+            'deadline' => ['required', 'date', 'after_or_equal:today'],
+        ]);
+
+        return response()->json($this->taskService->updateDeadline($task, $validated['deadline']));
+    }
+
+    public function deadlineHistory(): JsonResponse
+    {
+        return response()->json($this->taskService->deadlineHistory());
+    }
 }

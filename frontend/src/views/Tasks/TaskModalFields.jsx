@@ -1,4 +1,4 @@
-export default function TaskModalFields({ values, onChange, projectOptions, errors }) {
+export default function TaskModalFields({ values, onChange, projectOptions, errors, showDeadline = true }) {
   const today = new Date().toISOString().split('T')[0]
   const selectedProject = values.project || projectOptions[0] || ''
 
@@ -41,17 +41,19 @@ export default function TaskModalFields({ values, onChange, projectOptions, erro
           {errors.priority && <div className="field-error">{errors.priority}</div>}
         </label>
 
-        <label className="modal-field">
-          <span>Deadline</span>
-          <input
-            name="deadline"
-            type="date"
-            value={values.deadline}
-            onChange={onChange}
-            min={today}
-          />
-          {errors.deadline && <div className="field-error">{errors.deadline}</div>}
-        </label>
+        {showDeadline && (
+          <label className="modal-field">
+            <span>Deadline</span>
+            <input
+              name="deadline"
+              type="date"
+              value={values.deadline}
+              onChange={onChange}
+              min={today}
+            />
+            {errors.deadline && <div className="field-error">{errors.deadline}</div>}
+          </label>
+        )}
       </div>
 
       <label className="modal-field">
