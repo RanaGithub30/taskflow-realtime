@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { setAuthToken } from '../services/api'
 import { getUserDetails as fetchUserDetails } from '../services/userService'
+import { showAlert } from '../utils/alert'
 import './Sidebar.css'
 
 function Sidebar({ isAuthenticated, ...props }) {
@@ -32,6 +33,13 @@ function Sidebar({ isAuthenticated, ...props }) {
 
   const handleLogout = async () => {
     try {
+      const result = await showAlert.confirm(
+        'You Want to Logout?',
+        'Are You Sure',
+      )
+
+      if (!result.isConfirmed) return
+
       setAuthToken(null)
       setUser(null)
       setActiveMenu('dashboard')
