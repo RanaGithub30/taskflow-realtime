@@ -62,12 +62,12 @@ function Sidebar({ isAuthenticated, ...props }) {
       icon: '📁',
       href: '/projects'
     },
-    {
-      id: 'team',
-      label: 'Team',
-      icon: '👥',
-      href: '/team'
-    },
+    // {
+    //   id: 'team',
+    //   label: 'Team',
+    //   icon: '👥',
+    //   href: '/team'
+    // },
     {
       id: 'tasks',
       label: 'Tasks',
@@ -95,18 +95,18 @@ function Sidebar({ isAuthenticated, ...props }) {
   ]
 
   const bottomMenuItems = [
-    {
-      id: 'settings',
-      label: 'Settings',
-      icon: '⚙️',
-      href: '/settings'
-    },
-    {
-      id: 'help',
-      label: 'Help & Support',
-      icon: '❓',
-      href: '/help'
-    },
+    // {
+    //   id: 'settings',
+    //   label: 'Settings',
+    //   icon: '⚙️',
+    //   href: '/settings'
+    // },
+    // {
+    //   id: 'help',
+    //   label: 'Help & Support',
+    //   icon: '❓',
+    //   href: '/help'
+    // },
     {
       id: 'logout',
       label: 'Logout',

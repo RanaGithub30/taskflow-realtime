@@ -47,7 +47,7 @@ function App() {
         <Route path="/projects" element={<ProtectedRoute><Projects /></ProtectedRoute>} />
         <Route path="/timer" element={<ProtectedRoute><Timer /></ProtectedRoute>} />
         <Route path="/bugs" element={<ProtectedRoute><Bugs /></ProtectedRoute>} />
-        <Route path="/team" element={<ProtectedRoute><Team /></ProtectedRoute>} />
+        {/* <Route path="/team" element={<ProtectedRoute><Team /></ProtectedRoute>} /> */}
         <Route path="/reports" element={<ProtectedRoute><Reports /></ProtectedRoute>} />
         <Route path="*" element={<NotFound />} />
       </Routes>
