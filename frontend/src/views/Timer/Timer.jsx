@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import Sidebar from "../../components/Sidebar";
 import "./Timer.css";
 import { getAllProjects } from "../../services/projectService";
+import { startTaskTimer, stopTaskTimer } from "../../services/timerService";
 
 export default function Timer() {
   const [isRunning, setIsRunning] = useState(false);
@@ -12,9 +13,13 @@ export default function Timer() {
 
   const [activeTaskId, setActiveTaskId] = useState(null);
   const [taskTimes, setTaskTimes] = useState({});
+  const [activeEntryId, setActiveEntryId] = useState(null);
+  const [activeSessionBaseSeconds, setActiveSessionBaseSeconds] = useState(0);
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+
+  const [savingTimer, setSavingTimer] = useState(false);
 
   /* =========================
      TIMER
@@ -123,42 +128,85 @@ export default function Timer() {
      START TASK
   ========================= */
 
-  const startTask = (taskId) => {
-    setActiveTaskId(taskId);
-    setIsRunning(true);
+  const startTask = async (taskId) => {
+    try {
+      setSavingTimer(true);
+      setError("");
+      const entry = await startTaskTimer(taskId);
+      const baseSeconds = taskTimes[taskId] || 0;
 
-    setElapsedSeconds(
-      taskTimes[taskId] || 0
-    );
+      setActiveEntryId(entry.id);
+      setActiveTaskId(taskId);
+      setActiveSessionBaseSeconds(baseSeconds);
+      setElapsedSeconds(baseSeconds);
+      setIsRunning(true);
+    } catch (err) {
+      setError(err?.response?.data?.message || "Unable to start the timer.");
+    } finally {
+      setSavingTimer(false);
+    }
   };
 
   /* =========================
      PAUSE TASK
   ========================= */
 
-  const pauseTask = () => {
-    setIsRunning(false);
+  const durationToSeconds = (duration) => {
+    const [hours = 0, minutes = 0, seconds = 0] = duration.split(":").map(Number);
+    return hours * 3600 + minutes * 60 + seconds;
   };
 
   /* =========================
      STOP TASK
   ========================= */
 
-  const stopTask = () => {
-    setIsRunning(false);
-    setActiveTaskId(null);
-    setElapsedSeconds(0);
+  const finishActiveSession = async (keepTaskSelected) => {
+    if (!activeTaskId) return;
+
+    if (!activeEntryId) {
+      if (!keepTaskSelected) {
+        setActiveTaskId(null);
+        setElapsedSeconds(0);
+      }
+      return;
+    }
+
+    try {
+      setSavingTimer(true);
+      setError("");
+      const entry = await stopTaskTimer(activeEntryId);
+      const finalSeconds = activeSessionBaseSeconds + durationToSeconds(entry.time_spent);
+
+      setTaskTimes((previous) => ({ ...previous, [activeTaskId]: finalSeconds }));
+      setElapsedSeconds(finalSeconds);
+      setIsRunning(false);
+      setActiveEntryId(null);
+
+      if (!keepTaskSelected) {
+        setActiveTaskId(null);
+        setElapsedSeconds(0);
+      }
+    } catch (err) {
+      setError(err?.response?.data?.message || "Unable to save the timer.");
+    } finally {
+      setSavingTimer(false);
+    }
+  };
+
+  const pauseTask = () => finishActiveSession(true);
+
+  const stopTask = () => finishActiveSession(false);
+
+  const toggleCurrentTimer = () => {
+    if (isRunning) pauseTask();
+    else if (activeTaskId) startTask(activeTaskId);
   };
 
   /* =========================
      RESET
   ========================= */
 
-  const resetTimer = () => {
-    setIsRunning(false);
-    setActiveTaskId(null);
-    setElapsedSeconds(0);
-  };
+  const resetTimer = stopTask;
 
   /* =========================
      FORMAT TIME
@@ -242,6 +290,7 @@ export default function Timer() {
                     onChange={
                       handleProjectChange
                     }
+                    disabled={Boolean(activeEntryId) || savingTimer}
                   >
 
                     <option value="">
@@ -270,9 +319,11 @@ export default function Timer() {
                 <div className="timer-status-card">
 
                   <span className="timer-status-label">
-                    Current project
+                    Current project:
                   </span>
 
+                  &nbsp; 
+                  
                   <strong>
                     {currentProject?.name ||
                       "No project selected"}
@@ -388,6 +439,7 @@ export default function Timer() {
                                     taskId
                                   )
                                 }
+                                disabled={Boolean(activeTaskId) || savingTimer}
                               >
                                 Start
                               </button>
@@ -400,6 +452,7 @@ export default function Timer() {
                                   onClick={
                                     pauseTask
                                   }
+                                  disabled={!isRunning || savingTimer}
                                 >
                                   Pause
                                 </button>
@@ -409,6 +462,7 @@ export default function Timer() {
                                   onClick={
                                     stopTask
                                   }
+                                  disabled={savingTimer}
                                 >
                                   Stop
                                 </button>
@@ -453,12 +507,8 @@ export default function Timer() {
                       ? "button-secondary"
                       : ""
                   }`}
-                  onClick={() =>
-                    setIsRunning(
-                      (value) => !value
-                    )
-                  }
-                  disabled={!activeTaskId}
+                  onClick={toggleCurrentTimer}
+                  disabled={!activeTaskId || savingTimer}
                 >
                   {isRunning
                     ? "Pause timer"
@@ -470,6 +520,7 @@ export default function Timer() {
                   onClick={
                     resetTimer
                   }
+                  disabled={savingTimer}
                 >
                   Reset timer
                 </button>

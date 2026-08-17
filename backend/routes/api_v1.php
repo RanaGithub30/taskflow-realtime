@@ -7,6 +7,7 @@ use App\Http\Controllers\api\ProjectManageController;
 use App\Http\Controllers\api\InviteController;
 use App\Http\Controllers\api\TeamManageController;
 use App\Http\Controllers\Api\TaskController;
+use App\Http\Controllers\Api\TaskTimeTrackerController;
 
 Route::prefix('v1')->group(function () {
     Route::post('/register', [UserAuthManageController::class, 'register']);
@@ -53,5 +54,8 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::put('/tasks/{task}', [TaskController::class, 'update']);
         Route::patch('/tasks/{task}/deadline', [TaskController::class, 'updateDeadline']);
         Route::delete('/tasks/{task}', [TaskController::class, 'destroy']);
+
+        Route::post('/tasks/{task}/time-entries', [TaskTimeTrackerController::class, 'start']);
+        Route::patch('/time-entries/{entry}/stop', [TaskTimeTrackerController::class, 'stop']);
     });
 });
