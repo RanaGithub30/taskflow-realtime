@@ -20,4 +20,9 @@ class Task extends Model
     {
         return $this->hasMany(TaskDeadlineChange::class)->latest();
     }
+
+    public function project()
+    {
+        return $this->belongsTo(Project::class, 'project');
+    }
 }

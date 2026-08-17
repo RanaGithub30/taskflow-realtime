@@ -8,7 +8,8 @@ trait ProjectManageTrait{
     public function getAllProjects()
     {
         $user = auth()->user();
-        return Project::where('user_id', $user->id)->get();
+        return Project::where('user_id', $user->id)
+        ->with('tasks')->get();
     }
 
     public function getProjectById($id)

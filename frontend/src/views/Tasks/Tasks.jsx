@@ -69,14 +69,19 @@ export default function Tasks() {
           getAllTasks(),
         ])
 
-        const projectNames = projectData
-          .filter((project) => {
-            const status = (project.status || '').toString().toLowerCase()
-            return status !== 'completed' && status !== 'review'
-          })
-          .map((project) => project.name || project.title || '')
-          .filter(Boolean)
-        setProjects(projectNames)
+        const projectDetails = projectData
+        .filter((project) => {
+          const status = (project.status || "").toString().toLowerCase();
+
+          return status !== "completed" && status !== "review";
+        })
+        .map((project) => ({
+          id: project.id,
+          name: project.name || project.title || "",
+        }))
+        .filter((project) => project.id && project.name);
+
+        setProjects(projectDetails);
 
         const normalizedTasks = (Array.isArray(taskData) ? taskData : []).map((task) => ({
           id: task.id,
@@ -103,9 +108,9 @@ export default function Tasks() {
 
   const handleOpenModal = () => {
     const defaultProject = projectOptions[0] || ''
-
+  
     setFormValues({
-      project: defaultProject,
+      project: defaultProject.id.toString() || '',
       title: '',
       priority: 'Medium',
       deadline: '',
@@ -383,7 +388,7 @@ export default function Tasks() {
                       <div className="task-card-meta">
                         <div className="meta-item">
                           <span className="meta-label">Project:</span>
-                          <span className="meta-value">{task.project || 'Unassigned'}</span>
+                          <span className="meta-value">{task.project.name || 'Unassigned'}</span>
                         </div>
                         <div className="meta-item">
                           <span className="meta-label">Due:</span>

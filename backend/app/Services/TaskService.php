@@ -11,7 +11,8 @@ class TaskService
     {
         $user = auth()->user();
 
-        return Task::where('user_id', $user?->id)->latest()->get();
+        return Task::where('user_id', $user?->id)
+        ->with('project')->latest()->get();
     }
 
     public function store(array $data): Task
