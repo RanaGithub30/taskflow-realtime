@@ -5,10 +5,18 @@ import { getAllTasks } from '../../services/taskService'
 import { apiGet } from '../../services/api'
 import './Dashboard.css'
 
+const getProjectName = (project) => {
+  if (project && typeof project === 'object') {
+    return project.name || project.title || 'Unassigned'
+  }
+
+  return project || 'Unassigned'
+}
+
 const normalizeTasks = (data) => (Array.isArray(data) ? data : []).map((task) => ({
   id: task.id,
   title: task.title || 'Untitled task',
-  project: task.project || 'Unassigned',
+  project: getProjectName(task.project),
   priority: task.priority || 'Medium',
   status: task.status || 'Pending',
   assignee: task.assignee || 'You',
@@ -56,7 +64,7 @@ export default function Dashboard() {
     { label: 'Total Tasks', value: tasks.length, icon: '✓', color: '#4338ca' },
     { label: 'In Progress', value: tasks.filter((task) => task.status === 'In Progress').length, icon: '⌛', color: '#6366f1' },
     { label: 'Completed', value: tasks.filter((task) => task.status === 'Completed').length, icon: '✓', color: '#10b981' },
-    { label: 'Team Members', value: teamMembers, icon: '👥', color: '#f59e0b' },
+    // { label: 'Team Members', value: teamMembers, icon: '👥', color: '#f59e0b' },
   ], [tasks, teamMembers])
 
   const recentTasks = tasks.slice(0, 5)
